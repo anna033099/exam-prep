@@ -3,7 +3,11 @@
 <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
     <div>
         <h1 class="mb-1">錯題本</h1>
-        <p class="lead-muted mb-0">練習時答錯的題目會自動收進來；在重練時同一題連續答對 @PracticeService.MasteryStreak 次，就會標為「已熟練」。</p>
+        <p class="lead-muted mb-0">答錯的題目會自動收進來，並依 1、3、7、14、30 天的間隔安排複習；同一題連續答對 @PracticeService.MasteryStreak 次就標為「已熟練」。</p>
+        @if (Model.DueCount > 0)
+        {
+            <form asp-controller="Practice" asp-action="StartReview" method="post" class="mt-2"><button class="btn btn-amber" type="submit">今天有 @Model.DueCount 題到期，開始複習</button></form>
+        }
     </div>
     <form asp-action="Retry" method="post" class="d-flex gap-2 align-items-center">
         <input type="hidden" name="subject" value="@Model.Subject" />
@@ -53,16 +57,17 @@
             }
         </ul>
         <div class="q-foot">
-            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
+            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName・<a asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">討論與詳解</a>・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
             <span>答錯 <strong class="num">@w.WrongCount</strong> 次・最近 <span class="num">@TaipeiDate.ToTaipeiTime(w.LastWrongAt).ToString("MM/dd")</span></span>
             @if (w.Mastered) { <span class="pill pill-green">已熟練</span> }
             else if (w.CorrectStreak > 0) { <span class="pill pill-amber">已連對 @w.CorrectStreak 次</span> }
+            @if (!w.Mastered && w.DueAt is { } due) { <span>下次複習 <span class="num">@TaipeiDate.ToTaipeiTime(due).ToString("MM/dd")</span></span> }
         </div>
         <div class="q-foot">
             <form asp-action="SaveNote" method="post" class="d-flex gap-2 flex-grow-1">
                 <input type="hidden" name="id" value="@w.Id" />
                 <input type="hidden" name="subject" value="@Model.Subject" />
-                <input class="form-control form-control-sm" name="note" value="@w.Note" maxlength="1000" placeholder="寫下為什麼錯、正確觀念…" aria-label="筆記" />
+                <input class="form-control form-control-sm" name="note" value="@Model.Notes.GetValueOrDefault(w.QuestionId)" maxlength="1000" placeholder="寫下為什麼錯、正確觀念…" aria-label="筆記" />
                 <button class="btn btn-sm btn-line" type="submit">存筆記</button>
             </form>
             <form asp-action="ToggleMastered" method="post">

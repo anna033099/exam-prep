@@ -2,19 +2,30 @@
 @{
     ViewData["Title"] = "作答中";
     string? lastPassage = null;
+    var s = Model.Session;
+    var instant = s.Instant;
 }
 <div class="paper-head">
-    <p class="eyebrow mb-1">作答中</p>
-    <h1 class="h3 mb-1">@Model.Session.Title</h1>
-    <p class="small text-muted mb-0">單選題選一個答案；複選題（方形選框）須選出所有正確選項，全對才算答對。</p>
+    <div class="d-flex gap-2 flex-wrap mb-1">
+        @if (instant) { <span class="pill pill-green">逐題對答</span> }
+        @if (Model.Deadline is not null) { <span class="pill pill-amber">計時模擬考・@s.TimeLimitMinutes 分鐘</span> }
+    </div>
+    <h1 class="h3 mb-1">@s.Title</h1>
+    <p class="small text-muted mb-0">
+        @(instant ? "單選題點選答案就會立刻對答；複選題選好後按「確認答案」。" : "單選題選一個答案；複選題（方形選框）須選出所有正確選項，全對才算答對。")
+        @if (Model.Deadline is not null) { <text>時間到會自動交卷。</text> }
+    </p>
 </div>
 
-<form asp-action="Submit" asp-route-id="@Model.Session.Id" method="post" id="take-form" data-total="@Model.Questions.Count">
+<form asp-action="Submit" asp-route-id="@s.Id" method="post" id="take-form" data-total="@Model.Questions.Count"
+      data-instant="@(instant ? "1" : "0")" data-check-url="@Url.Action("Check", new { id = s.Id })"
+      data-deadline="@(Model.Deadline?.ToString("o") ?? "")">
     @for (var i = 0; i < Model.Questions.Count; i++)
     {
         var q = Model.Questions[i];
         var multi = q.Type == QuestionType.Multiple;
-        <section class="q" id="q@(i + 1)">
+        var done = Model.Answers.GetValueOrDefault(q.Id);
+        <section class="q @(done is null ? "" : done.IsCorrect ? "result-correct" : "result-wrong")" id="q@(i + 1)" data-qid="@q.Id" data-multi="@(multi ? "1" : "0")">
             @if (!string.IsNullOrEmpty(q.Passage))
             {
                 if (q.Passage == lastPassage)
@@ -38,20 +49,38 @@
                 @foreach (var (letter, text) in q.Options())
                 {
                     var id = $"q{q.Id}_{letter}";
-                    <li class="opt @(multi ? "multi" : "")">
+                    var cls = done is null ? "" : q.Answer.Contains(letter) ? "is-answer" : done.Selected.Contains(letter) ? "is-wrong" : "";
+                    <li class="opt @(multi ? "multi" : "") @cls" data-letter="@letter">
                         <label for="@id">
-                            <input type="@(multi ? "checkbox" : "radio")" id="@id" name="q_@q.Id" value="@letter" />
+                            <input type="@(multi ? "checkbox" : "radio")" id="@id" name="q_@q.Id" value="@letter"
+                                   checked="@(done?.Selected.Contains(letter) ?? false)" disabled="@(done is not null)" />
                             <span class="letter">@letter</span>
                             <span>@QuestionText.Render(text)</span>
                         </label>
                     </li>
                 }
             </ul>
-            <div class="q-foot"><span>出處：@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</span></div>
+            <div class="q-foot">
+                @if (instant && done is null && multi)
+                {
+                    <button type="button" class="btn btn-sm btn-ink js-check">確認答案</button>
+                }
+                <span class="js-verdict" aria-live="polite">
+                    @if (done is not null)
+                    {
+                        @(done.IsCorrect ? "答對" : $"答錯，正解 {q.Answer}")
+                    }
+                </span>
+                <span>出處：@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</span>
+                <a class="js-detail @(done is null ? "d-none" : "")" href="@Url.Action("Detail", "Question", new { id = q.Id })" target="_blank">討論與詳解</a>
+            </div>
         </section>
     }
     <div class="submit-bar">
-        <span class="progress-text">已作答 <span id="answered-count">0 / @Model.Questions.Count</span></span>
-        <button class="btn btn-red btn-lg" type="submit">交卷批改</button>
+        <span class="progress-text">
+            已作答 <span id="answered-count">@Model.Answers.Count / @Model.Questions.Count</span>
+            @if (Model.Deadline is not null) { <span class="ms-3">剩餘 <span id="timer">--:--</span></span> }
+        </span>
+        <button class="btn btn-red btn-lg" type="submit">@(instant ? "結束並看結果" : "交卷批改")</button>
     </div>
 </form>

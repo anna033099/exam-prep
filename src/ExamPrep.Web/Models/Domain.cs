@@ -141,6 +141,9 @@ public class QuestionPaper
     [MaxLength(500)]
     public string SourceNote { get; set; } = "";
 
+    /// <summary>公開版不提供題目內文（著作權考量），只列試卷與原始來源連結。</summary>
+    public bool ContentWithheld { get; set; }
+
     public int OfficialQuestionCount { get; set; }
 
     /// <summary>因含圖表等原因未收錄的題號與原因（JSON）。</summary>
@@ -206,6 +209,14 @@ public class PracticeSession
     /// <summary>整卷練習時對應的試卷；隨機抽題與錯題重練為 null。</summary>
     public int? PaperId { get; set; }
 
+    public PracticeMode Mode { get; set; }
+
+    /// <summary>逐題即時對答：每答一題就顯示對錯。</summary>
+    public bool Instant { get; set; }
+
+    /// <summary>計時模擬考的時限（分鐘）；null 表示不計時。</summary>
+    public int? TimeLimitMinutes { get; set; }
+
     /// <summary>出題順序（題目 Id，以逗號分隔），讓作答頁與結果頁一致。</summary>
     public string QuestionIds { get; set; } = "";
 
@@ -224,6 +235,18 @@ public class PracticeAnswer
     public string Selected { get; set; } = "";
 
     public bool IsCorrect { get; set; }
+
+    public DateTime AnsweredAt { get; set; }
+}
+
+public enum PracticeMode
+{
+    Paper = 0,
+    Random = 1,
+    WrongBook = 2,
+    Custom = 3,
+    Review = 4,
+    Daily = 5
 }
 
 /// <summary>錯題本：每位使用者每題一筆。</summary>
@@ -241,6 +264,10 @@ public class WrongQuestion
     public int CorrectStreak { get; set; }
     public DateTime LastWrongAt { get; set; }
     public bool Mastered { get; set; }
+
+    /// <summary>間隔複習：下次該複習的時間與目前間隔（天）。</summary>
+    public DateTime? DueAt { get; set; }
+    public int IntervalDays { get; set; }
 
     [MaxLength(1000)]
     public string? Note { get; set; }
@@ -306,4 +333,84 @@ public class UserSetting
 
     /// <summary>每日讀書目標（分鐘）。</summary>
     public int DailyGoalMinutes { get; set; } = 180;
+
+    /// <summary>每日刷題目標（題）。</summary>
+    public int DailyGoalQuestions { get; set; } = 20;
+
+    /// <summary>是否以暱稱出現在排行榜（預設不公開）。</summary>
+    public bool ShowOnLeaderboard { get; set; }
+}
+
+public class QuestionBookmark
+{
+    public int Id { get; set; }
+    [MaxLength(450)] public string UserId { get; set; } = "";
+    public int QuestionId { get; set; }
+    public Question? Question { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
+/// <summary>使用者對單一題目的個人筆記。</summary>
+public class QuestionNote
+{
+    public int Id { get; set; }
+    [MaxLength(450)] public string UserId { get; set; } = "";
+    public int QuestionId { get; set; }
+    public Question? Question { get; set; }
+    [MaxLength(2000)] public string Body { get; set; } = "";
+    public DateTime UpdatedAt { get; set; }
+}
+
+public class QuestionComment
+{
+    public int Id { get; set; }
+    public int QuestionId { get; set; }
+    public Question? Question { get; set; }
+    [MaxLength(450)] public string UserId { get; set; } = "";
+    public ApplicationUser? User { get; set; }
+    [MaxLength(1000)] public string Body { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+    public int ReportCount { get; set; }
+    public bool IsHidden { get; set; }
+}
+
+public enum ErrataKind
+{
+    StemText = 0,
+    OptionText = 1,
+    Answer = 2,
+    AiExplanation = 3,
+    Other = 4
+}
+
+public enum ErrataStatus
+{
+    Open = 0,
+    Resolved = 1,
+    Rejected = 2
+}
+
+public class ErrataReport
+{
+    public int Id { get; set; }
+    public int QuestionId { get; set; }
+    public Question? Question { get; set; }
+    [MaxLength(450)] public string UserId { get; set; } = "";
+    public ErrataKind Kind { get; set; }
+    [MaxLength(1000)] public string Detail { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+    public ErrataStatus Status { get; set; }
+    [MaxLength(500)] public string? AdminNote { get; set; }
+}
+
+/// <summary>AI 生成的詳解（快取，每題一份），一律標示為 AI 生成。</summary>
+public class QuestionExplanation
+{
+    public int Id { get; set; }
+    public int QuestionId { get; set; }
+    public Question? Question { get; set; }
+    [MaxLength(100)] public string Model { get; set; } = "";
+    public string Body { get; set; } = "";
+    public DateTime CreatedAt { get; set; }
+    [MaxLength(450)] public string RequestedByUserId { get; set; } = "";
 }

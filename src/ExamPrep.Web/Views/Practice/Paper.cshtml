@@ -36,16 +36,37 @@
                 <p class="small mt-3 mb-0"><strong>答案備註：</strong>@Model.AnswerNote</p>
             }
             <div class="mt-3">
-                @if (SignIn.IsSignedIn(User))
+                @if (Model.ContentWithheld)
                 {
-                    <form asp-action="StartPaper" method="post" class="d-inline">
-                        <input type="hidden" name="paperId" value="@Model.Id" />
-                        <button class="btn btn-ink" type="submit">整卷作答（@count 題）</button>
-                    </form>
+                    <p class="flash mb-0">公開版不提供這份試卷的題目內文（公司自辦甄試的試題可能受著作權保護），請由上方原始檔案連結查看。</p>
+                }
+                else if (SignIn.IsSignedIn(User))
+                {
+                    <div class="d-flex gap-2 flex-wrap">
+                        <form asp-action="StartPaper" method="post">
+                            <input type="hidden" name="paperId" value="@Model.Id" />
+                            <button class="btn btn-ink" type="submit">整卷作答（@count 題）</button>
+                        </form>
+                        <form asp-action="StartPaper" method="post">
+                            <input type="hidden" name="paperId" value="@Model.Id" />
+                            <input type="hidden" name="mode" value="instant" />
+                            <button class="btn btn-line" type="submit">逐題對答</button>
+                        </form>
+                        <form asp-action="StartPaper" method="post" class="d-flex gap-1 align-items-center">
+                            <input type="hidden" name="paperId" value="@Model.Id" />
+                            <input type="hidden" name="mode" value="exam" />
+                            <button class="btn btn-line" type="submit">計時模擬考</button>
+                            <input class="form-control form-control-sm" style="width:4.5rem" type="number" name="minutes" value="60" min="5" max="300" aria-label="分鐘" /><span class="small text-muted">分</span>
+                        </form>
+                    </div>
                 }
                 else
                 {
                     <a class="btn btn-ink" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@($"/Practice/Paper/{Model.Id}")">登入後作答</a>
+                }
+                @if ((int)ViewBag.ZipCount > 1)
+                {
+                    <p class="small mt-3 mb-0"><a asp-controller="Download" asp-action="Subject" asp-route-subject="@Model.SubjectName" asp-route-exam="@Model.Exam?.Slug">下載「@Model.SubjectName」歷年原卷 ZIP（@Math.Min((int)ViewBag.ZipCount, PaperZipService.MaxPapers) 份試題＋答案）</a></p>
                 }
             </div>
         </div>

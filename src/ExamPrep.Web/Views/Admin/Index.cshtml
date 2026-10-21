@@ -8,6 +8,8 @@
     <div class="metric"><div class="label">試卷</div><div class="value">@ViewBag.Papers</div></div>
     <div class="metric"><div class="label">題目</div><div class="value">@ViewBag.Questions</div></div>
     <div class="metric"><div class="label">會員</div><div class="value">@ViewBag.Users</div></div>
+    <a class="metric text-decoration-none text-reset" asp-action="Errata"><div class="label">待處理勘誤</div><div class="value">@ViewBag.OpenErrata</div></a>
+    <a class="metric text-decoration-none text-reset" asp-action="Comments"><div class="label">被檢舉留言</div><div class="value">@ViewBag.ReportedComments</div></a>
     <div class="metric">
         <div class="label">官方試題包</div>
         <form asp-action="ReimportOfficial" method="post"><button class="btn btn-sm btn-line mt-2" type="submit">重新匯入（只新增）</button></form>

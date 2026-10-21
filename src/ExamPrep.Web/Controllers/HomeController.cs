@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPrep.Web.Controllers;
 
-public class HomeController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown, TaipeiDate date) : Controller
+public class HomeController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown, TaipeiDate date, StatsService stats) : Controller
 {
     public async Task<IActionResult> Index()
     {
@@ -75,7 +75,19 @@ public class HomeController(AppDbContext db, UserManager<ApplicationUser> users,
             RecentSessions = await db.PracticeSessions.Where(s => s.UserId == userId && s.FinishedAt != null)
                 .OrderByDescending(s => s.FinishedAt).Take(5).ToListAsync()
         };
+        vm.Daily = await stats.DailyAsync(userId);
         return View(vm);
+    }
+
+    [Microsoft.AspNetCore.Authorization.Authorize, HttpPost]
+    public async Task<IActionResult> SetQuestionGoal(int count)
+    {
+        var uid = users.GetUserId(User)!;
+        var s = await db.UserSettings.FindAsync(uid);
+        if (s is null) db.UserSettings.Add(s = new UserSetting { UserId = uid });
+        s.DailyGoalQuestions = Math.Clamp(count, 5, 100);
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Index));
     }
 
     public IActionResult About() => View();

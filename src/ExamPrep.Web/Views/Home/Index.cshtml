@@ -23,6 +23,27 @@
     </div>
 </div>
 
+<div class="sheet mb-3 d-flex justify-content-between align-items-center gap-3 flex-wrap">
+    <div style="flex:1;min-width:240px">
+        <h2 class="h5 mb-1">今日任務</h2>
+        <div class="d-flex justify-content-between small"><span>刷題 <strong class="num">@Model.Daily.AnsweredToday</strong> / @Model.Daily.Goal 題</span><span>連續刷題 <strong class="num">@Model.Daily.StreakDays</strong> 天</span></div>
+        <div class="meter"><i style="width:@(Math.Min(100, Model.Daily.Goal == 0 ? 0 : Model.Daily.AnsweredToday * 100 / Model.Daily.Goal))%"></i></div>
+        <form asp-action="SetQuestionGoal" method="post" class="d-flex align-items-center gap-2 mt-2 small">
+            <label for="qgoal" class="text-muted">每日目標</label>
+            <input id="qgoal" class="form-control form-control-sm" style="width:5rem" type="number" name="count" min="5" max="100" value="@Model.Daily.Goal" />
+            <span class="text-muted">題</span>
+            <button class="btn btn-sm btn-line" type="submit">更新</button>
+        </form>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        @if (Model.Daily.DueReviews > 0)
+        {
+            <form asp-controller="Practice" asp-action="StartReview" method="post"><button class="btn btn-amber" type="submit">複習到期錯題（@Model.Daily.DueReviews）</button></form>
+        }
+        <form asp-controller="Practice" asp-action="StartDaily" method="post"><button class="btn btn-ink" type="submit">開始今日推薦</button></form>
+    </div>
+</div>
+
 <div class="dash-grid">
     <div class="metric green">
         <div class="label">今天讀書</div>

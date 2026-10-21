@@ -4,8 +4,8 @@ import requests
 
 BASE = 'https://wwwq.moex.gov.tw/exam/'
 KEEP = ['一般行政', '一般民政', '人事行政', '資訊處理']
-EXAMS = sorted(json.load(open('codes_101_115.json', encoding='utf-8')), reverse=True)
-KIND = {c: ('chudeng' if '初等' in t else 'gaopu' if '高等考試三級' in t else 'local') for c, (y, t) in json.load(open('codes_101_115.json', encoding='utf-8')).items()}
+EXAMS = sorted(json.load(open(os.environ.get('MOEX_CODES', 'codes.json'), encoding='utf-8')), reverse=True)
+KIND = {c: ('chudeng' if '初等' in t else 'gaopu' if '高等考試三級' in t else 'local') for c, (y, t) in json.load(open(os.environ.get('MOEX_CODES', 'codes.json'), encoding='utf-8')).items()}
 os.makedirs('pdf', exist_ok=True)
 s = requests.Session(); s.headers['User-Agent'] = 'Mozilla/5.0 (portfolio study tool)'
 manifest = []
@@ -44,5 +44,8 @@ for code in EXAMS:
         seen[key] = entry
         manifest.append(entry)
     print(code, len(seen), flush=True)
+old = json.load(open('manifest.json', encoding='utf-8')) if os.path.exists('manifest.json') else []
+keys = {(m['exam_code'], m['s'], m['c']) for m in manifest}
+manifest = [m for m in old if (m['exam_code'], m['s'], m['c']) not in keys] + manifest
 json.dump(manifest, open('manifest.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 print('total papers', len(manifest))

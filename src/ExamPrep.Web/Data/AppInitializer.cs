@@ -23,6 +23,7 @@ public static class AppInitializer
         await seed.ImportExamInfoAsync();
         if (config.GetValue("Seed:ImportOfficialPapersOnStartup", true))
             await seed.ImportOfficialPapersAsync();
+        await seed.PurgeWithheldContentAsync();
 
         var roles = sp.GetRequiredService<RoleManager<IdentityRole>>();
         if (!await roles.RoleExistsAsync(AdminRole))

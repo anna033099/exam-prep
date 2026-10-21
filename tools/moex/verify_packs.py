@@ -1,5 +1,5 @@
 """獨立驗證：(1) 每題題幹與選項文字是否逐字出現在原始 PDF；(2) 答案是否與以另一種方法讀出的答案表一致。"""
-import json, re, glob, subprocess, collections
+import json, re, glob, subprocess, collections, sys
 import pymupdf as fitz
 
 man = {(m['exam_code'], m['q_url'].replace('https://wwwq.moex.gov.tw/exam/', '')): m for m in json.load(open('manifest.json', encoding='utf-8'))}
@@ -30,7 +30,7 @@ def answers_layout(pdf):
     return out
 
 stats = collections.Counter(); bad_text = []; bad_ans = []
-for f in sorted(glob.glob('packs/papers_*.json')):
+for f in sorted(glob.glob((sys.argv[1] if len(sys.argv) > 1 else 'packs') + '/papers_*.json')):
     for p in json.load(open(f, encoding='utf-8')):
         m = man[(p['examCode'], p['sourceQuestionUrl'].replace('https://wwwq.moex.gov.tw/exam/', ''))]
         full = poppler_text(m['q_pdf'])
@@ -48,3 +48,4 @@ for f in sorted(glob.glob('packs/papers_*.json')):
 print(stats)
 print('text samples', bad_text[:15])
 print('answer samples', bad_ans[:15])
+sys.exit(1 if stats['text_mismatch'] or stats['ans_mismatch'] else 0)

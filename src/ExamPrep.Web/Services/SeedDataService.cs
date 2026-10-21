@@ -10,7 +10,7 @@ namespace ExamPrep.Web.Services;
 /// 從 SeedData 資料夾匯入考試資訊與官方試題包。可重複執行：已存在的資料以代碼比對後略過或更新。
 /// 試題包由 tools/moex 下的解析程式從考選部官方 PDF 產生，每題都附來源連結。
 /// </summary>
-public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<SeedDataService> log)
+public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<SeedDataService> log, Microsoft.Extensions.Options.IOptions<SiteOptions> site)
 {
     private static readonly JsonSerializerOptions Json = new()
     {
@@ -99,8 +99,10 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
                     skipped++;
                     continue;
                 }
+                var withheld = site.Value.IsWithheld(p.ExamSlug);
                 var paper = new QuestionPaper
                 {
+                    ContentWithheld = withheld,
                     ExamCode = p.ExamCode,
                     PaperCode = p.PaperCode,
                     ExamId = examIds.TryGetValue(p.ExamSlug, out var id) ? id : null,
@@ -115,7 +117,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
                     OfficialQuestionCount = p.OfficialQuestionCount,
                     ExcludedJson = JsonSerializer.Serialize(p.Excluded),
                     ImportedAt = DateTime.UtcNow,
-                    Questions = p.Questions.Select(q => new Question
+                    Questions = withheld ? new List<Question>() : p.Questions.Select(q => new Question
                     {
                         Number = q.No,
                         Type = q.Type == "multi" ? QuestionType.Multiple : QuestionType.Single,
@@ -139,6 +141,34 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         }
         log.LogInformation("官方試題匯入：新增 {Papers} 份、{Questions} 題，略過 {Skipped} 份既有試卷", papers, questions, skipped);
         return new(0, 0, papers, questions, skipped);
+    }
+
+    /// <summary>
+    /// 公開模式下，移除不提供內文之試卷的題目（以及相關作答、錯題、收藏、筆記、留言），
+    /// 避免從非公開版本切換過來的資料庫仍保留內文。
+    /// </summary>
+    public async Task<int> PurgeWithheldContentAsync(CancellationToken ct = default)
+    {
+        if (!site.Value.PublicMode) return 0;
+        var slugs = site.Value.WithheldExamSlugs;
+        var papers = db.Papers.Where(p => p.Exam != null && slugs.Contains(p.Exam.Slug));
+        var qids = db.Questions.Where(q => papers.Select(p => p.Id).Contains(q.PaperId)).Select(q => q.Id);
+        if (!await qids.AnyAsync(ct))
+        {
+            await papers.Where(p => !p.ContentWithheld).ExecuteUpdateAsync(u => u.SetProperty(p => p.ContentWithheld, true), ct);
+            return 0;
+        }
+        await db.PracticeAnswers.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.WrongQuestions.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.Bookmarks.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.QuestionNotes.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.Comments.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.ErrataReports.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        await db.Explanations.Where(a => qids.Contains(a.QuestionId)).ExecuteDeleteAsync(ct);
+        var n = await db.Questions.Where(q => papers.Select(p => p.Id).Contains(q.PaperId)).ExecuteDeleteAsync(ct);
+        await papers.ExecuteUpdateAsync(u => u.SetProperty(p => p.ContentWithheld, true), ct);
+        log.LogInformation("公開模式：移除 {Count} 題不提供內文的題目", n);
+        return n;
     }
 
     // ---- seed file shapes ----

@@ -1,0 +1,35 @@
+@model List<QuestionBookmark>
+@{ ViewData["Title"] = "我的收藏"; }
+<div class="list-head">
+    <div>
+        <h1 class="mb-1">我的收藏</h1>
+        <p class="lead-muted mb-0">在單題頁按「收藏這題」就會出現在這裡。</p>
+    </div>
+    <a class="btn btn-ink" asp-action="Custom">用收藏的題目出題</a>
+</div>
+@if (Model.Count == 0)
+{
+    <div class="empty sheet mt-3"><p class="mb-0">還沒有收藏題目。</p></div>
+}
+else
+{
+    <div class="paper-list mt-3">
+        @foreach (var b in Model)
+        {
+            var q = b.Question!;
+            <div class="paper-row">
+                <div class="yr">@q.Paper!.RocYear<small>年</small></div>
+                <div style="min-width:0">
+                    <a class="name" asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">@QuestionText.Render(q.Stem.Length > 90 ? q.Stem[..90] + "…" : (string.IsNullOrEmpty(q.Stem) ? "（題組題）" : q.Stem))</a>
+                    <div class="sub">@q.Paper.SubjectName・第 @q.Number 題</div>
+                </div>
+                <div class="act">
+                    <form asp-controller="Question" asp-action="Bookmark" asp-route-id="@q.Id" method="post">
+                        <input type="hidden" name="returnUrl" value="/Practice/Bookmarks" />
+                        <button class="btn btn-sm btn-line" type="submit">取消收藏</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

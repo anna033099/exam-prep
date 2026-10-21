@@ -1,0 +1,49 @@
+@model SearchVm
+@{ ViewData["Title"] = string.IsNullOrEmpty(Model.Q) ? "搜尋題目" : $"搜尋「{Model.Q}」"; }
+<h1 class="mb-3">搜尋題目</h1>
+<form method="get" class="hero-search mt-0 mb-3" role="search" style="max-width:none;box-shadow:none">
+    <input name="q" value="@Model.Q" type="search" minlength="2" placeholder="輸入題目裡的關鍵字，例如：比例原則、正當法律程序、TCP" aria-label="搜尋題目內容" />
+    <select name="exam" class="form-select" style="width:auto;border:0;background-color:var(--soft)" aria-label="考試">
+        <option value="">全部考試</option>
+        @foreach (var e in Model.Exams) { <option value="@e.Slug" selected="@(Model.Exam == e.Slug)">@e.ShortName</option> }
+    </select>
+    <button class="btn btn-ink" type="submit">搜尋</button>
+</form>
+
+@if (string.IsNullOrEmpty(Model.Q))
+{
+    <p class="text-muted">搜尋範圍是題幹、選項和題組文章。要找某一科的整份試卷，請到<a asp-controller="Practice" asp-action="Index">題庫練習</a>。</p>
+}
+else if (Model.Q.Length < 2)
+{
+    <p class="text-muted">請輸入至少 2 個字。</p>
+}
+else
+{
+    <p class="text-muted">找到 <strong class="num">@Model.Total</strong> 題@(Model.PageCount > 1 ? $"，第 {Model.Page} / {Model.PageCount} 頁" : "")。</p>
+    @if (Model.Total == 0)
+    {
+        <div class="empty sheet"><p class="mb-0">沒有題目包含「@Model.Q」。試試較短的關鍵字。</p></div>
+    }
+    <div class="paper-list">
+        @foreach (var q in Model.Results)
+        {
+            <div class="paper-row">
+                <div class="yr">@q.Paper!.RocYear<small>年</small></div>
+                <div style="min-width:0">
+                    <a class="name" asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">@QuestionText.Render(q.Stem.Length > 90 ? q.Stem[..90] + "…" : (string.IsNullOrEmpty(q.Stem) ? "（題組題）" : q.Stem))</a>
+                    <div class="sub">@q.Paper.SubjectName・第 @q.Number 題</div>
+                </div>
+                <div class="act"><a class="btn btn-sm btn-line" asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">看題目</a></div>
+            </div>
+        }
+    </div>
+    @if (Model.PageCount > 1)
+    {
+        <nav class="pager" aria-label="分頁">
+            <a class="btn btn-sm btn-line @(Model.Page <= 1 ? "disabled" : "")" asp-route-q="@Model.Q" asp-route-exam="@Model.Exam" asp-route-page="@(Model.Page - 1)">上一頁</a>
+            <span class="small text-muted num">@Model.Page / @Model.PageCount</span>
+            <a class="btn btn-sm btn-line @(Model.Page >= Model.PageCount ? "disabled" : "")" asp-route-q="@Model.Q" asp-route-exam="@Model.Exam" asp-route-page="@(Model.Page + 1)">下一頁</a>
+        </nav>
+    }
+}

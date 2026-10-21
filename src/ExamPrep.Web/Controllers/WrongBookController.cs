@@ -16,7 +16,7 @@ public class WrongBookController(AppDbContext db, UserManager<ApplicationUser> u
 
     public async Task<IActionResult> Index(string? subject, bool showMastered = false)
     {
-        var mine = db.WrongQuestions.Where(w => w.UserId == UserId);
+        var mine = db.WrongQuestions.Where(w => w.UserId == UserId && !w.Question!.Paper!.ContentWithheld);
         var subjects = await mine.Where(w => !w.Mastered)
             .GroupBy(w => w.Question!.Paper!.SubjectName)
             .Select(g => new { g.Key, Count = g.Count() }).OrderByDescending(x => x.Count).ToListAsync();
@@ -25,12 +25,16 @@ public class WrongBookController(AppDbContext db, UserManager<ApplicationUser> u
         if (!showMastered) q = q.Where(w => !w.Mastered);
         if (!string.IsNullOrEmpty(subject)) q = q.Where(w => w.Question!.Paper!.SubjectName == subject);
 
+        var items = await q.OrderByDescending(w => w.WrongCount).ThenByDescending(w => w.LastWrongAt).Take(200).ToListAsync();
+        var qids = items.Select(w => w.QuestionId).ToList();
         return View(new WrongBookVm
         {
+            DueCount = await practice.DueQuery(UserId).CountAsync(),
+            Notes = await db.QuestionNotes.Where(n => n.UserId == UserId && qids.Contains(n.QuestionId)).ToDictionaryAsync(n => n.QuestionId, n => n.Body),
             Subject = subject,
             ShowMastered = showMastered,
             Subjects = subjects.Select(s => (s.Key, s.Count)).ToList(),
-            Items = await q.OrderByDescending(w => w.WrongCount).ThenByDescending(w => w.LastWrongAt).Take(200).ToListAsync()
+            Items = items
         });
     }
 
@@ -62,7 +66,17 @@ public class WrongBookController(AppDbContext db, UserManager<ApplicationUser> u
     {
         var w = await db.WrongQuestions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == UserId);
         if (w is null) return NotFound();
-        w.Note = string.IsNullOrWhiteSpace(note) ? null : note.Trim()[..Math.Min(note.Trim().Length, 1000)];
+        // 錯題筆記與單題頁共用同一份個人筆記
+        var text = (note ?? "").Trim();
+        if (text.Length > 2000) text = text[..2000];
+        var n = await db.QuestionNotes.FirstOrDefaultAsync(x => x.UserId == UserId && x.QuestionId == w.QuestionId);
+        if (text.Length == 0) { if (n is not null) db.QuestionNotes.Remove(n); }
+        else
+        {
+            if (n is null) db.QuestionNotes.Add(n = new QuestionNote { UserId = UserId, QuestionId = w.QuestionId });
+            n.Body = text;
+            n.UpdatedAt = DateTime.UtcNow;
+        }
         await db.SaveChangesAsync();
         TempData["Flash"] = "筆記已儲存。";
         return Redirect(Url.Action(nameof(Index), new { subject }) + $"#w{id}");

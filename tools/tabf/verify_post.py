@@ -1,5 +1,5 @@
 """獨立驗證郵局試題：以 pdftotext 重新讀取【n】題號，比對答案；並確認題目文字逐字出現在原卷。"""
-import json, re, subprocess, collections
+import json, re, subprocess, collections, sys
 import pymupdf as fitz
 def norm(s):
     s = (s or '').replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
@@ -26,3 +26,4 @@ for p in json.load(open('packs/papers_post.json', encoding='utf-8')):
         if any(x and norm(x) not in full for x in [q['stem'], *q['options'].values(), q['passage']]):
             st['text_mismatch'] += 1
 print(st, bad[:10])
+sys.exit(1 if st['ans_mismatch'] or st['text_mismatch'] else 0)

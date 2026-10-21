@@ -1,0 +1,160 @@
+@model QuestionPageVm
+@{
+    var q = Model.Question;
+    var p = q.Paper!;
+    ViewData["Title"] = $"{p.RocYear} 年 {p.SubjectName} 第 {q.Number} 題";
+    var multi = q.Type == QuestionType.Multiple;
+    var here = Context.Request.Path.ToString();
+    string[] kinds = ["題目文字有誤", "選項文字有誤", "答案有誤", "AI 詳解有誤", "其他"];
+}
+<p class="eyebrow mb-1"><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.RocYear 年 @p.SubjectName</a> ／ 第 @q.Number 題</p>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <section class="q" id="single" data-answer="@q.Answer">
+            @if (!string.IsNullOrEmpty(q.Passage)) { <div class="q-passage">@QuestionText.Render(q.Passage)</div> }
+            <div class="q-head">
+                <span class="q-no">@q.Number.</span>
+                <div class="q-stem">
+                    @if (multi) { <span class="pill pill-amber me-1">複選</span> }
+                    @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依上方題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+                </div>
+            </div>
+            <ul class="opts">
+                @foreach (var (letter, text) in q.Options())
+                {
+                    <li class="opt @(multi ? "multi" : "")" data-letter="@letter"><label><span class="letter">@letter</span><span>@QuestionText.Render(text)</span></label></li>
+                }
+            </ul>
+            <div class="q-foot">
+                <button type="button" class="btn btn-sm btn-ink" id="reveal">看答案</button>
+                <span id="answer-text" class="fw-bold" hidden>官方答案：@q.Answer</span>
+                @if (Model.LastAnswer is { } la)
+                {
+                    <span>你上次作答：@(string.IsNullOrEmpty(la.Selected) ? "未作答" : la.Selected)（@(la.IsCorrect ? "答對" : "答錯")）</span>
+                }
+            </div>
+        </section>
+
+        <div class="sheet" id="ai">
+            <div class="sheet-title"><h2>AI 詳解</h2><span class="pill pill-amber">AI 生成・可能有誤</span></div>
+            @if (Model.Explanation is { } ex)
+            {
+                <div style="white-space:pre-wrap">@ex.Body</div>
+                <p class="small text-muted mt-3 mb-0">由 @ex.Model 於 @TaipeiDate.ToTaipeiTime(ex.CreatedAt).ToString("yyyy/MM/dd") 產生。這份解析不是官方或老師撰寫，以官方答案（@q.Answer）與教科書、法規原文為準；發現錯誤請在下方回報。</p>
+            }
+            else if (!Model.AiEnabled)
+            {
+                <p class="text-muted mb-0">這個網站目前沒有啟用 AI 詳解。</p>
+            }
+            else if (!Model.SignedIn)
+            {
+                <p class="text-muted mb-0"><a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@here">登入</a>後可以請 AI 產生這題的解析。</p>
+            }
+            else
+            {
+                <p class="text-muted">這題還沒有解析。AI 會根據官方答案（@q.Answer）逐一說明每個選項，內容可能有誤，請搭配教材查證。</p>
+                <form asp-action="Explain" asp-route-id="@q.Id" method="post">
+                    <button class="btn btn-line" type="submit">產生 AI 詳解</button>
+                </form>
+            }
+        </div>
+
+        <div class="sheet" id="discuss">
+            <div class="sheet-title"><h2>討論（@Model.Comments.Count）</h2></div>
+            @if (Model.Comments.Count == 0) { <p class="text-muted">還沒有人留言。可以分享你的解題思路或記憶方法。</p> }
+            @foreach (var c in Model.Comments)
+            {
+                <div class="mb-3 pb-3" style="border-bottom:1px solid var(--line)">
+                    <div class="d-flex justify-content-between gap-2">
+                        <strong>@(string.IsNullOrWhiteSpace(c.User?.DisplayName) ? "考生" : c.User!.DisplayName)</strong>
+                        <span class="small text-muted">@TaipeiDate.ToTaipeiTime(c.CreatedAt).ToString("yyyy/MM/dd HH:mm")</span>
+                    </div>
+                    <div style="white-space:pre-wrap">@c.Body</div>
+                    @if (Model.SignedIn)
+                    {
+                        <div class="d-flex gap-3 mt-1">
+                            <form asp-action="ReportComment" asp-route-commentId="@c.Id" method="post"><button class="btn btn-link btn-sm p-0 text-muted" type="submit">檢舉</button></form>
+                            @if (c.UserId == ViewContext.HttpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value || User.IsInRole(ExamPrep.Web.Data.AppInitializer.AdminRole))
+                            {
+                                <form asp-action="DeleteComment" asp-route-commentId="@c.Id" method="post"><button class="btn btn-link btn-sm p-0 text-muted" type="submit" onclick="return confirm('刪除這則留言？')">刪除</button></form>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            @if (Model.SignedIn)
+            {
+                <form asp-action="Comment" asp-route-id="@q.Id" method="post">
+                    <label class="form-label" for="body">留言</label>
+                    <textarea class="form-control mb-2" id="body" name="body" rows="3" maxlength="@QuestionController.CommentMaxLength" required placeholder="分享解題思路、記憶口訣或相關法條"></textarea>
+                    <button class="btn btn-ink btn-sm" type="submit">送出留言</button>
+                </form>
+            }
+            else
+            {
+                <p class="mb-0"><a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@here">登入</a>後即可留言。</p>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sheet">
+            <h2 class="h5">我的筆記</h2>
+            @if (Model.SignedIn)
+            {
+                <form asp-action="Bookmark" asp-route-id="@q.Id" method="post" class="mb-3">
+                    <input type="hidden" name="returnUrl" value="@here" />
+                    <button class="btn btn-sm @(Model.Bookmarked ? "btn-amber" : "btn-line")" type="submit" aria-pressed="@(Model.Bookmarked ? "true" : "false")">@(Model.Bookmarked ? "★ 已收藏" : "☆ 收藏這題")</button>
+                </form>
+                <form asp-action="Note" asp-route-id="@q.Id" method="post">
+                    <input type="hidden" name="returnUrl" value="@here" />
+                    <textarea class="form-control mb-2" name="body" rows="5" maxlength="2000" placeholder="只有你看得到">@Model.Note</textarea>
+                    <button class="btn btn-sm btn-line" type="submit">儲存筆記</button>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted mb-0"><a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@here">登入</a>後可收藏題目、寫筆記。</p>
+            }
+        </div>
+
+        <div class="sheet">
+            <h2 class="h5">出處</h2>
+            <p class="small mb-1">@p.RocYear 年 @p.ExamTitle</p>
+            <p class="small mb-1">@p.SubjectName・試題代號 @p.PaperCode</p>
+            <p class="small mb-0"><a href="@p.SourceQuestionUrl" target="_blank" rel="noopener">原卷 PDF</a>@if (p.SourceAnswerUrl != p.SourceQuestionUrl) { <text>　<a href="@p.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF</a></text> }</p>
+        </div>
+
+        <div class="sheet" id="errata">
+            <h2 class="h5">回報錯誤</h2>
+            @if (Model.OpenErrata > 0) { <p class="small text-muted">這題已有 @Model.OpenErrata 則回報等待確認。</p> }
+            @if (Model.SignedIn)
+            {
+                <form asp-action="Errata" asp-route-id="@q.Id" method="post">
+                    <select class="form-select form-select-sm mb-2" name="kind" aria-label="錯誤類型">
+                        @for (var i = 0; i < kinds.Length; i++) { <option value="@i">@kinds[i]</option> }
+                    </select>
+                    <textarea class="form-control form-control-sm mb-2" name="detail" rows="3" maxlength="1000" required placeholder="哪裡和原卷不一樣？"></textarea>
+                    <button class="btn btn-sm btn-line" type="submit">送出回報</button>
+                </form>
+            }
+            else
+            {
+                <p class="small text-muted mb-0">發現題目和原卷不一致？登入後可回報。</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.getElementById('reveal')?.addEventListener('click', function () {
+    const box = document.getElementById('single');
+    const ans = box.dataset.answer;
+    box.querySelectorAll('.opt').forEach(li => { if (ans.includes(li.dataset.letter)) li.classList.add('is-answer'); });
+    document.getElementById('answer-text').hidden = false;
+    this.remove();
+});
+</script>
+}

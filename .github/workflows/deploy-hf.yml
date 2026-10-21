@@ -1,0 +1,63 @@
+name: 部署到 Hugging Face Space
+
+# 需要的設定（GitHub repo → Settings → Secrets and variables → Actions）：
+#   Secrets：HF_TOKEN   Hugging Face 的 write 權杖
+#   Variables：HF_SPACE  例如 anna033099/exam-prep
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "deploy/hf/**"
+      - ".github/workflows/deploy-hf.yml"
+  workflow_dispatch:
+  workflow_call:
+    secrets:
+      HF_TOKEN:
+        required: true
+
+concurrency:
+  group: deploy-hf
+  cancel-in-progress: false
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: 檢查設定
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "::error::請先在 GitHub 設定 Secret HF_TOKEN 與 Variable HF_SPACE（例如 anna033099/exam-prep）"
+            exit 1
+          fi
+
+      - name: 組出 Space 內容
+        run: |
+          mkdir -p hfdeploy
+          cp -r src hfdeploy/src
+          mkdir -p hfdeploy/deploy/hf
+          cp deploy/hf/start.sh hfdeploy/deploy/hf/start.sh
+          cp deploy/hf/Dockerfile hfdeploy/Dockerfile
+          cp deploy/hf/README.md hfdeploy/README.md
+          cp .dockerignore hfdeploy/.dockerignore
+          find hfdeploy -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
+
+      - name: 上傳到 Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          pip install --quiet "huggingface_hub[cli]==2.2.0"
+          hf upload "$HF_SPACE" hfdeploy . --repo-type space --delete "*" \
+            --commit-message "Deploy ${GITHUB_SHA::7} from GitHub Actions"

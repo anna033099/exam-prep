@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using ExamPrep.Web.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamPrep.Web.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser>(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<ApplicationUser>(options), IDataProtectionKeyContext
 {
     public DbSet<Exam> Exams => Set<Exam>();
     public DbSet<ExamSession> ExamSessions => Set<ExamSession>();
@@ -18,6 +19,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<StudySubject> StudySubjects => Set<StudySubject>();
     public DbSet<StudyLog> StudyLogs => Set<StudyLog>();
     public DbSet<UserSetting> UserSettings => Set<UserSetting>();
+    public DbSet<QuestionBookmark> Bookmarks => Set<QuestionBookmark>();
+    public DbSet<QuestionNote> QuestionNotes => Set<QuestionNote>();
+    public DbSet<QuestionComment> Comments => Set<QuestionComment>();
+    public DbSet<ErrataReport> ErrataReports => Set<ErrataReport>();
+    public DbSet<QuestionExplanation> Explanations => Set<QuestionExplanation>();
+
+    /// <summary>登入 cookie 的加密金鑰存在資料庫，容器重啟後使用者不會被登出。</summary>
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -40,6 +49,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<UserTargetExam>().HasIndex(t => new { t.UserId, t.ExamSessionId }).IsUnique();
 
         b.Entity<StudyLog>().HasIndex(l => new { l.UserId, l.Date });
+
+        b.Entity<PracticeAnswer>().HasIndex(a => a.AnsweredAt);
+        b.Entity<WrongQuestion>().HasIndex(w => new { w.UserId, w.DueAt });
+        b.Entity<QuestionBookmark>().HasIndex(x => new { x.UserId, x.QuestionId }).IsUnique();
+        b.Entity<QuestionNote>().HasIndex(x => new { x.UserId, x.QuestionId }).IsUnique();
+        b.Entity<QuestionComment>().HasIndex(x => new { x.QuestionId, x.CreatedAt });
+        b.Entity<QuestionComment>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<ErrataReport>().HasIndex(x => new { x.Status, x.CreatedAt });
+        b.Entity<QuestionExplanation>().HasIndex(x => x.QuestionId).IsUnique();
+        b.Entity<QuestionExplanation>().HasIndex(x => new { x.RequestedByUserId, x.CreatedAt });
         b.Entity<StudyLog>().HasOne(l => l.StudySubject).WithMany(s => s.Logs).OnDelete(DeleteBehavior.Cascade);
     }
 }

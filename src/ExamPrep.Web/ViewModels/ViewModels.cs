@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using ExamPrep.Web.Models;
+using ExamPrep.Web.Services;
 
 namespace ExamPrep.Web.ViewModels;
 
@@ -38,6 +39,7 @@ public record CountdownItem(ExamSession Session, int DaysToExam, int? DaysToRegi
 
 public class DashboardVm
 {
+    public DailyProgress Daily { get; set; } = new(0, 20, 0, 0);
     public string DisplayName { get; set; } = "";
     public List<CountdownItem> Targets { get; set; } = new();
     public CountdownItem? NextExam { get; set; }
@@ -89,6 +91,7 @@ public class PaperRow
     public int OfficialCount { get; set; }
     public string? ExamSlug { get; set; }
     public int? BestScore { get; set; }
+    public bool Withheld { get; set; }
 }
 
 public class PracticeIndexVm
@@ -114,10 +117,61 @@ public class TakeVm
     public List<Question> Questions { get; set; } = new();
     public Dictionary<int, PracticeAnswer> Answers { get; set; } = new();
     public HashSet<int> InWrongBook { get; set; } = new();
+    public DateTime? Deadline { get; set; }
+}
+
+public class CustomVm
+{
+    public string? Exam { get; set; }
+    public List<Exam> Exams { get; set; } = new();
+    public List<int> Years { get; set; } = new();
+    public List<(string Subject, int Count)> Subjects { get; set; } = new();
+}
+
+public class CustomInput
+{
+    public string? Exam { get; set; }
+    public int? YearFrom { get; set; }
+    public int? YearTo { get; set; }
+    public List<string>? Subjects { get; set; }
+    [Range(1, 100)] public int Count { get; set; } = 20;
+    public QuestionSource Source { get; set; }
+    /// <summary>random 或 sequential。</summary>
+    public string Order { get; set; } = "random";
+    /// <summary>normal、instant 或 exam。</summary>
+    public string Mode { get; set; } = "normal";
+    [Range(5, 300)] public int Minutes { get; set; } = 60;
+}
+
+public class QuestionPageVm
+{
+    public Question Question { get; set; } = null!;
+    public bool Bookmarked { get; set; }
+    public string? Note { get; set; }
+    public QuestionExplanation? Explanation { get; set; }
+    public bool AiEnabled { get; set; }
+    public List<QuestionComment> Comments { get; set; } = new();
+    public int OpenErrata { get; set; }
+    public PracticeAnswer? LastAnswer { get; set; }
+    public bool SignedIn { get; set; }
+}
+
+public class SearchVm
+{
+    public string? Q { get; set; }
+    public string? Exam { get; set; }
+    public int Page { get; set; } = 1;
+    public int PageCount { get; set; } = 1;
+    public int Total { get; set; }
+    public List<Exam> Exams { get; set; } = new();
+    public List<Question> Results { get; set; } = new();
+    public const int PageSize = 30;
 }
 
 public class WrongBookVm
 {
+    public int DueCount { get; set; }
+    public Dictionary<int, string> Notes { get; set; } = new();
     public string? Subject { get; set; }
     public bool ShowMastered { get; set; }
     public List<(string Subject, int Open)> Subjects { get; set; } = new();

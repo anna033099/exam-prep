@@ -1,0 +1,70 @@
+name: 每月更新題庫
+
+# 每月 5 日 03:17 UTC（台灣時間 11:17）檢查考選部與台灣金融研訓院有沒有新試題；
+# 新題目逐題驗證通過才寫入，提交到 main 後重新部署。也可以在 Actions 頁面手動執行。
+on:
+  schedule:
+    - cron: "17 3 5 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-questions
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝解析工具
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q poppler-utils poppler-data
+          pip install --quiet pymupdf==2.0 requests==2.34.2 beautifulsoup4==4.15.0
+
+      - name: 抓取並驗證新試題
+        id: update
+        run: python tools/update_questions.py --work "$RUNNER_TEMP/examprep"
+
+      - name: 顯示結果
+        if: always()
+        run: test -f update_summary.md && cat update_summary.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: 確認網站仍可建置與通過測試
+        run: dotnet test --configuration Release
+
+      - name: 提交新題庫
+        id: commit
+        run: |
+          rm -f update_summary.md
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "examprep-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/ExamPrep.Web/SeedData tools/moex/codes.json tools/tabf/post_manifest.json
+          git commit -m "每月自動更新題庫 $(date -u +%Y-%m-%d)"
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy-hf.yml
+    secrets:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}

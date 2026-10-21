@@ -1,0 +1,86 @@
+@model CustomVm
+@{ ViewData["Title"] = "自訂練習"; }
+<h1 class="mb-1">自訂練習</h1>
+<p class="lead-muted">挑考試、年度、科目和題目來源，組一份自己的練習卷。</p>
+
+<form asp-action="StartCustom" method="post" class="row g-3 mt-1">
+    <div class="col-lg-7">
+        <div class="sheet">
+            <h2 class="h5">範圍</h2>
+            <div class="row g-2 mb-3">
+                <div class="col-sm-6">
+                    <label class="form-label" for="exam">考試</label>
+                    <select class="form-select" id="exam" name="Exam" onchange="location.href='?exam='+encodeURIComponent(this.value)">
+                        <option value="">全部考試</option>
+                        @foreach (var e in Model.Exams) { <option value="@e.Slug" selected="@(Model.Exam == e.Slug)">@e.ShortName</option> }
+                    </select>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <label class="form-label" for="yf">從</label>
+                    <select class="form-select" id="yf" name="YearFrom"><option value="">不限</option>@foreach (var y in Model.Years) { <option value="@y">@y 年</option> }</select>
+                </div>
+                <div class="col-6 col-sm-3">
+                    <label class="form-label" for="yt">到</label>
+                    <select class="form-select" id="yt" name="YearTo"><option value="">不限</option>@foreach (var y in Model.Years) { <option value="@y">@y 年</option> }</select>
+                </div>
+            </div>
+            <label class="form-label" for="subject-filter">科目（不勾選表示全部）</label>
+            <input class="form-control form-control-sm mb-2" id="subject-filter" type="search" placeholder="篩選科目名稱" />
+            <div id="subject-list" style="max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:var(--r-sm);padding:.5rem .75rem">
+                @{ var i = 0; }
+                @foreach (var (s, n) in Model.Subjects)
+                {
+                    <div class="form-check" data-name="@s">
+                        <input class="form-check-input" type="checkbox" name="Subjects" value="@s" id="s@(i)" />
+                        <label class="form-check-label" for="s@(i++)">@s <span class="text-muted small">@n 題</span></label>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="sheet">
+            <h2 class="h5">出題方式</h2>
+            <label class="form-label" for="source">題目來源</label>
+            <select class="form-select mb-3" id="source" name="Source">
+                <option value="@((int)QuestionSource.All)">全部題目</option>
+                <option value="@((int)QuestionSource.Unseen)">只出沒做過的</option>
+                <option value="@((int)QuestionSource.Wrong)">只出錯題本裡的</option>
+                <option value="@((int)QuestionSource.Bookmarked)">只出收藏的</option>
+            </select>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label" for="order">順序</label>
+                    <select class="form-select" id="order" name="Order">
+                        <option value="random">隨機</option>
+                        <option value="sequential">循序（依年度、題號）</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label" for="count2">題數</label>
+                    <select class="form-select" id="count2" name="Count"><option>10</option><option selected>20</option><option>30</option><option>50</option><option>100</option></select>
+                </div>
+            </div>
+            <fieldset class="mb-3">
+                <legend class="form-label">作答模式</legend>
+                <div class="form-check"><input class="form-check-input" type="radio" name="Mode" value="normal" id="m1" checked /><label class="form-check-label" for="m1">寫完再交卷批改</label></div>
+                <div class="form-check"><input class="form-check-input" type="radio" name="Mode" value="instant" id="m2" /><label class="form-check-label" for="m2">逐題即時對答</label></div>
+                <div class="form-check d-flex align-items-center gap-2">
+                    <input class="form-check-input" type="radio" name="Mode" value="exam" id="m3" />
+                    <label class="form-check-label" for="m3">計時模擬考</label>
+                    <input class="form-control form-control-sm" style="width:5rem" type="number" name="Minutes" value="60" min="5" max="300" aria-label="分鐘" /> 分鐘
+                </div>
+            </fieldset>
+            <button class="btn btn-ink w-100" type="submit">開始練習</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+document.getElementById('subject-filter').addEventListener('input', function () {
+    const t = this.value.trim();
+    document.querySelectorAll('#subject-list .form-check').forEach(d => d.hidden = t && !d.dataset.name.includes(t));
+});
+</script>
+}

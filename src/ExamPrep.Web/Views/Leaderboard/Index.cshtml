@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "排行榜";
+    var byCount = (List<LeaderRow>)ViewBag.ByCount;
+    var byRate = (List<LeaderRow>)ViewBag.ByRate;
+    var weekStart = (DateOnly)ViewBag.WeekStart;
+}
+<div class="list-head">
+    <div>
+        <h1 class="mb-1">本週排行榜</h1>
+        <p class="lead-muted mb-0">統計 @TaipeiDate.Roc(weekStart) 起（週一）的作答。只有選擇公開的考生會出現，你自己的名次一定看得到。</p>
+    </div>
+    @if ((bool)ViewBag.SignedIn)
+    {
+        <form asp-action="Toggle" method="post"><button class="btn @((bool)ViewBag.ShowMe ? "btn-line" : "btn-ink")" type="submit">@((bool)ViewBag.ShowMe ? "從排行榜隱藏我" : "公開我的暱稱")</button></form>
+    }
+</div>
+
+<div class="row g-3 mt-1">
+    @foreach (var (title, rows, rate) in new[] { ("作答題數", byCount, false), ("正確率（本週 50 題以上）", byRate, true) })
+    {
+        <div class="col-lg-6">
+            <div class="sheet">
+                <h2 class="h5">@title</h2>
+                @if (rows.Count == 0) { <p class="text-muted mb-0">本週還沒有資料。</p> }
+                <table class="table-paper">
+                    @for (var i = 0; i < rows.Count; i++)
+                    {
+                        var r = rows[i];
+                        <tr style="@(r.IsMe ? "background:var(--green-tint)" : "")">
+                            <td class="num fw-bold" style="width:3rem">@(i + 1)</td>
+                            <td>@r.DisplayName@(r.IsMe ? "（你）" : "")</td>
+                            <td class="num text-end">@(rate ? $"{r.Rate * 100:0.0}%" : $"{r.Answered} 題")</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+    }
+</div>

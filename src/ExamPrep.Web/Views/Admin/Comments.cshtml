@@ -1,0 +1,29 @@
+@model List<QuestionComment>
+@{ ViewData["Title"] = "留言管理"; var hiddenOnly = (bool)ViewBag.HiddenOnly; }
+<p class="eyebrow mb-1"><a asp-action="Index">管理</a></p>
+<h1>留言管理</h1>
+<nav class="d-flex gap-2 mb-3">
+    <a class="pill @(!hiddenOnly ? "pill-red" : "")" asp-route-hiddenOnly="false">被檢舉或已隱藏</a>
+    <a class="pill @(hiddenOnly ? "pill-red" : "")" asp-route-hiddenOnly="true">只看已隱藏</a>
+</nav>
+<p class="small text-muted">留言被 @QuestionController.HideAfterReports 位使用者檢舉會自動隱藏。</p>
+@if (Model.Count == 0) { <div class="empty sheet">沒有需要處理的留言。</div> }
+@foreach (var c in Model)
+{
+    <div class="sheet">
+        <div class="d-flex justify-content-between gap-2 flex-wrap">
+            <div><strong>@(c.User?.DisplayName ?? "考生")</strong> <span class="small text-muted">@c.User?.Email</span></div>
+            <div class="d-flex gap-2">
+                @if (c.IsHidden) { <span class="pill">已隱藏</span> }
+                <span class="pill pill-wrong">檢舉 @c.ReportCount</span>
+            </div>
+        </div>
+        <p class="my-2" style="white-space:pre-wrap">@c.Body</p>
+        <p class="small mb-2"><a asp-controller="Question" asp-action="Detail" asp-route-id="@c.QuestionId">@c.Question!.Paper!.RocYear 年 @c.Question.Paper.SubjectName 第 @c.Question.Number 題</a></p>
+        <form asp-action="ModerateComment" asp-route-id="@c.Id" method="post" class="d-flex gap-2">
+            @if (!c.IsHidden) { <button class="btn btn-sm btn-line" name="action" value="hide">隱藏</button> }
+            <button class="btn btn-sm btn-line" name="action" value="restore">恢復顯示</button>
+            <button class="btn btn-sm btn-line" name="action" value="delete" onclick="return confirm('刪除這則留言？')">刪除</button>
+        </form>
+    </div>
+}

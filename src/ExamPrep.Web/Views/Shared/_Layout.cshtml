@@ -32,6 +32,7 @@
                     <li class="nav-item"><a class="nav-link @Active("Calendar")" asp-controller="Calendar" asp-action="Index">考試行事曆</a></li>
                     <li class="nav-item"><a class="nav-link @Active("Exams")" asp-controller="Exams" asp-action="Index">考試資訊</a></li>
                     <li class="nav-item"><a class="nav-link @Active("Practice")" asp-controller="Practice" asp-action="Index">題庫練習</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Leaderboard")" asp-controller="Leaderboard" asp-action="Index">排行榜</a></li>
                     @if (SignIn.IsSignedIn(User))
                     {
                         <li class="nav-item"><a class="nav-link @Active("WrongBook")" asp-controller="WrongBook" asp-action="Index">錯題本</a></li>
@@ -42,9 +43,9 @@
                         <li class="nav-item"><a class="nav-link @Active("Admin")" asp-controller="Admin" asp-action="Index">管理</a></li>
                     }
                 </ul>
-                <form class="header-search" method="get" asp-controller="Practice" asp-action="Index" role="search">
+                <form class="header-search" method="get" asp-controller="Search" asp-action="Index" role="search">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                    <input name="q" type="search" placeholder="搜尋科目或類科" aria-label="搜尋科目或類科" />
+                    <input name="q" type="search" placeholder="搜尋題目內容" aria-label="搜尋題目內容" />
                 </form>
                 <ul class="navbar-nav">
                     @if (SignIn.IsSignedIn(User))

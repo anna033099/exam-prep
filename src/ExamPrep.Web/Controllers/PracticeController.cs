@@ -33,7 +33,8 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
             {
                 Id = p.Id, RocYear = p.RocYear, ExamTitle = p.ExamTitle, SubjectName = p.SubjectName,
                 Categories = p.Categories, PaperCode = p.PaperCode, QuestionCount = p.Questions.Count,
-                OfficialCount = p.OfficialQuestionCount, ExamSlug = p.Exam != null ? p.Exam.Slug : null
+                OfficialCount = p.OfficialQuestionCount, ExamSlug = p.Exam != null ? p.Exam.Slug : null,
+                Withheld = p.ContentWithheld
             }).ToListAsync();
 
         if (userId is not null)
@@ -64,18 +65,25 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
         });
     }
 
+    /// <summary>整卷作答。mode：normal 一般交卷批改；instant 逐題即時對答；exam 計時模擬考。</summary>
     [HttpPost]
-    public async Task<IActionResult> StartPaper(int paperId)
+    public async Task<IActionResult> StartPaper(int paperId, string mode = "normal", int minutes = 60)
     {
-        if (!await db.Papers.AnyAsync(p => p.Id == paperId)) return NotFound();
-        var s = await practice.CreateFromPaperAsync(UserId, paperId);
+        var paper = await db.Papers.FirstOrDefaultAsync(p => p.Id == paperId);
+        if (paper is null) return NotFound();
+        if (paper.ContentWithheld)
+        {
+            TempData["Flash"] = "公開版不提供這份試卷的題目內文，請由試卷頁的原始來源連結查看。";
+            return RedirectToAction(nameof(Paper), new { id = paperId });
+        }
+        var s = await practice.CreateFromPaperAsync(UserId, paperId, mode == "instant", mode == "exam" ? minutes : null);
         return RedirectToAction(nameof(Take), new { id = s.Id });
     }
 
     [HttpPost]
-    public async Task<IActionResult> StartRandom(string subject, int count = 20, bool unseenOnly = false)
+    public async Task<IActionResult> StartRandom(string subject, int count = 20, bool unseenOnly = false, bool instant = false)
     {
-        var s = await practice.CreateRandomAsync(UserId, subject, count, unseenOnly);
+        var s = await practice.CreateRandomAsync(UserId, subject, count, unseenOnly, instant);
         if (s is null)
         {
             TempData["Flash"] = unseenOnly ? $"「{subject}」的題目你都做過了，可取消「只出沒做過的題目」。" : $"找不到「{subject}」的題目。";
@@ -84,12 +92,94 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
         return RedirectToAction(nameof(Take), new { id = s.Id });
     }
 
+    /// <summary>自訂範圍出題頁。</summary>
+    public async Task<IActionResult> Custom(string? exam)
+    {
+        var subjects = db.Questions.Where(q => !q.Paper!.ContentWithheld);
+        if (!string.IsNullOrEmpty(exam)) subjects = subjects.Where(q => q.Paper!.Exam!.Slug == exam);
+        return View(new CustomVm
+        {
+            Exam = exam,
+            Exams = await db.Exams.OrderBy(e => e.SortOrder).ToListAsync(),
+            Years = await db.Papers.Where(p => !p.ContentWithheld).Select(p => p.RocYear).Distinct().OrderBy(y => y).ToListAsync(),
+            Subjects = (await subjects.GroupBy(q => q.Paper!.SubjectName).Select(g => new { g.Key, C = g.Count() })
+                .OrderByDescending(x => x.C).ToListAsync()).Select(x => (x.Key, x.C)).ToList()
+        });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> StartCustom(CustomInput input)
+    {
+        var query = new CustomQuery(input.Exam, input.YearFrom, input.YearTo, input.Subjects ?? [], input.Count,
+            input.Source, input.Order == "sequential");
+        var s = await practice.CreateCustomAsync(UserId, query, input.Mode == "instant", input.Mode == "exam" ? input.Minutes : null);
+        if (s is null)
+        {
+            TempData["Flash"] = "沒有符合條件的題目，請放寬年度、科目或題目來源。";
+            return RedirectToAction(nameof(Custom), new { exam = input.Exam });
+        }
+        return RedirectToAction(nameof(Take), new { id = s.Id });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> StartReview(int count = 20)
+    {
+        var s = await practice.CreateReviewAsync(UserId, count);
+        if (s is null)
+        {
+            TempData["Flash"] = "今天沒有到期要複習的錯題。";
+            return RedirectToAction("Index", "WrongBook");
+        }
+        return RedirectToAction(nameof(Take), new { id = s.Id });
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> StartDaily()
+    {
+        var goal = (await db.UserSettings.FindAsync(UserId))?.DailyGoalQuestions ?? 20;
+        var s = await practice.CreateDailyAsync(UserId, goal);
+        if (s is null)
+        {
+            TempData["Flash"] = "題庫裡的題目你都做過了，可以改用錯題重練或自訂練習。";
+            return RedirectToAction("Index", "Home");
+        }
+        return RedirectToAction(nameof(Take), new { id = s.Id });
+    }
+
+    /// <summary>逐題模式的單題對答（JSON）。</summary>
+    [HttpPost]
+    public async Task<IActionResult> Check(int id, int questionId, string? selected)
+    {
+        var s = await db.PracticeSessions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == UserId);
+        if (s is null) return NotFound();
+        var a = await practice.AnswerOneAsync(s, questionId, selected);
+        if (a is null) return BadRequest();
+        var answer = await db.Questions.Where(q => q.Id == questionId).Select(q => q.Answer).FirstAsync();
+        return Json(new { correct = a.IsCorrect, selected = a.Selected, answer, finished = s.FinishedAt is not null });
+    }
+
+    /// <summary>我的收藏。</summary>
+    public async Task<IActionResult> Bookmarks()
+    {
+        var list = await db.Bookmarks.Where(b => b.UserId == UserId && !b.Question!.Paper!.ContentWithheld)
+            .Include(b => b.Question).ThenInclude(q => q!.Paper)
+            .OrderByDescending(b => b.CreatedAt).Take(300).ToListAsync();
+        return View(list);
+    }
+
     public async Task<IActionResult> Take(int id)
     {
         var s = await db.PracticeSessions.FirstOrDefaultAsync(x => x.Id == id && x.UserId == UserId);
         if (s is null) return NotFound();
         if (s.FinishedAt is not null) return RedirectToAction(nameof(Result), new { id });
-        return View(new TakeVm { Session = s, Questions = await practice.LoadQuestionsAsync(s) });
+        await db.Entry(s).Collection(x => x.Answers).LoadAsync();
+        return View(new TakeVm
+        {
+            Session = s,
+            Questions = await practice.LoadQuestionsAsync(s),
+            Answers = s.Answers.ToDictionary(a => a.QuestionId),
+            Deadline = s.TimeLimitMinutes is { } m ? DateTime.SpecifyKind(s.StartedAt, DateTimeKind.Utc).AddMinutes(m) : null
+        });
     }
 
     [HttpPost]
@@ -137,6 +227,8 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
         ViewBag.Excluded = JsonSerializer.Deserialize<List<SeedDataService.ExcludedSeed>>(p.ExcludedJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
         ViewBag.Count = await db.Questions.CountAsync(q => q.PaperId == id);
+        ViewBag.ZipCount = p.ContentWithheld ? 0 : await db.Papers.CountAsync(x => x.SubjectName == p.SubjectName && x.ExamId == p.ExamId
+                                                                                 && !x.ContentWithheld && x.SourceQuestionUrl.StartsWith("https://wwwq.moex.gov.tw/"));
         return View(p);
     }
 }

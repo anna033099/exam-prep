@@ -11,7 +11,14 @@
         <h1 class="mb-1">題庫練習</h1>
         <p class="lead-muted mb-0">初等、高普考、地方特考 101–115 年，郵局 111–114 年，中華電信 101–103 年的歷屆選擇題。</p>
     </div>
-    @if (signedIn) { <a class="btn btn-line" asp-action="History">練習紀錄</a> }
+    @if (signedIn)
+    {
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-ink" asp-action="Custom">自訂練習</a>
+            <a class="btn btn-line" asp-action="Bookmarks">我的收藏</a>
+            <a class="btn btn-line" asp-action="History">練習紀錄</a>
+        </div>
+    }
 </div>
 
 <div class="browse mt-3">
@@ -49,9 +56,13 @@
                         <option>10</option><option selected>20</option><option>30</option><option>50</option>
                     </select>
                 </div>
-                <div class="form-check mb-3">
+                <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="unseenOnly" name="unseenOnly" value="true" />
                     <label class="form-check-label small" for="unseenOnly">只出沒做過的題目</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="instant" name="instant" value="true" />
+                    <label class="form-check-label small" for="instant">逐題即時對答</label>
                 </div>
                 <button class="btn btn-ink w-100" type="submit">開始</button>
             </form>
@@ -98,11 +109,18 @@
                             <div class="sub">
                                 @p.ExamTitle@if (cats.Length > 0) { <text>｜@string.Join("、", cats.Take(2))@(cats.Length > 2 ? $" 等 {cats.Length} 類" : "")</text> }
                             </div>
-                            <div class="sub">收錄 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</div>
+                            @if (p.Withheld)
+                            {
+                                <div class="sub">公開版不提供內文，請看原卷</div>
+                            }
+                            else
+                            {
+                                <div class="sub">收錄 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</div>
+                            }
                         </div>
                         <div class="act">
                             @if (p.BestScore is { } b) { <span class="pill @(b >= 60 ? "pill-green" : "pill-wrong")">最佳 @b%</span> }
-                            @if (signedIn)
+                            @if (signedIn && !p.Withheld)
                             {
                                 <form asp-action="StartPaper" method="post">
                                     <input type="hidden" name="paperId" value="@p.Id" />

@@ -21,7 +21,7 @@ def poppler_text(pdf):
 
 
 
-CODES = json.load(open('codes_101_115.json', encoding='utf-8'))
+CODES = json.load(open(os.environ.get('MOEX_CODES', 'codes.json'), encoding='utf-8'))
 SLUG = {'010': 'chudeng', '080': 'gaopu', '190': 'local', '200': 'local'}
 out_dir = sys.argv[1]
 os.makedirs(out_dir, exist_ok=True)

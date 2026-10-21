@@ -16,6 +16,8 @@ public class AdminController(AppDbContext db, QuestionCsvImporter csv, SeedDataS
         ViewBag.Papers = await db.Papers.CountAsync();
         ViewBag.Questions = await db.Questions.CountAsync();
         ViewBag.Users = await db.Users.CountAsync();
+        ViewBag.OpenErrata = await db.ErrataReports.CountAsync(e => e.Status == ErrataStatus.Open);
+        ViewBag.ReportedComments = await db.Comments.CountAsync(c => c.ReportCount > 0 && !c.IsHidden);
         var sessions = await db.ExamSessions.Include(s => s.Exam).OrderByDescending(s => s.ExamStart).ToListAsync();
         var custom = await db.Papers.Where(p => p.ExamCode.StartsWith("CUSTOM-"))
             .OrderByDescending(p => p.ImportedAt).Select(p => new PaperRow
@@ -158,5 +160,52 @@ public class AdminController(AppDbContext db, QuestionCsvImporter csv, SeedDataS
         await db.SaveChangesAsync();
         TempData["Flash"] = $"已刪除「{s.Title}」。";
         return RedirectToAction(nameof(Index));
+    }
+
+    // ---------- 勘誤與留言 ----------
+    public async Task<IActionResult> Errata(ErrataStatus status = ErrataStatus.Open)
+    {
+        ViewBag.Status = status;
+        var list = await db.ErrataReports.Where(e => e.Status == status)
+            .Include(e => e.Question).ThenInclude(q => q!.Paper)
+            .OrderByDescending(e => e.CreatedAt).Take(200).ToListAsync();
+        return View(list);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ResolveErrata(int id, ErrataStatus status, string? note)
+    {
+        var e = await db.ErrataReports.FindAsync(id);
+        if (e is null) return NotFound();
+        e.Status = status;
+        e.AdminNote = string.IsNullOrWhiteSpace(note) ? null : note.Trim()[..Math.Min(note.Trim().Length, 500)];
+        // AI 詳解被確認有誤時，刪除快取讓下次重新產生
+        if (status == ErrataStatus.Resolved && e.Kind == ErrataKind.AiExplanation)
+            db.Explanations.RemoveRange(db.Explanations.Where(x => x.QuestionId == e.QuestionId));
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Errata));
+    }
+
+    public async Task<IActionResult> Comments(bool hiddenOnly = false)
+    {
+        ViewBag.HiddenOnly = hiddenOnly;
+        var q = db.Comments.Include(c => c.User).Include(c => c.Question).ThenInclude(x => x!.Paper).AsQueryable();
+        q = hiddenOnly ? q.Where(c => c.IsHidden) : q.Where(c => c.ReportCount > 0 || c.IsHidden);
+        return View(await q.OrderByDescending(c => c.ReportCount).ThenByDescending(c => c.CreatedAt).Take(200).ToListAsync());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ModerateComment(int id, string action)
+    {
+        var c = await db.Comments.FindAsync(id);
+        if (c is null) return NotFound();
+        switch (action)
+        {
+            case "hide": c.IsHidden = true; break;
+            case "restore": c.IsHidden = false; c.ReportCount = 0; break;
+            case "delete": db.Comments.Remove(c); break;
+        }
+        await db.SaveChangesAsync();
+        return RedirectToAction(nameof(Comments));
     }
 }
