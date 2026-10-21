@@ -1,0 +1,56 @@
+@model CountdownItem
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
+@{
+    var s = Model.Session;
+    var past = Model.DaysToExam < 0 && (s.ExamEnd.DayNumber - s.ExamStart.DayNumber) < -Model.DaysToExam;
+    var during = Model.DaysToExam <= 0 && !past;
+    var regOpen = s.RegistrationStart is { } rs && s.RegistrationEnd is { } re
+                  && Model.DaysToRegistrationEnd >= 0
+                  && (rs.DayNumber - s.ExamStart.DayNumber + Model.DaysToExam) <= 0;
+    int? daysToRegStart = s.RegistrationStart is { } rs0 ? rs0.DayNumber - s.ExamStart.DayNumber + Model.DaysToExam : null;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<article class="countdown @(Model.IsTarget ? "is-target" : "") @(past ? "past" : "")">
+    <div class="days @(during ? "today" : "")">
+        @if (past)
+        {
+            <strong>—</strong><span>已結束</span>
+        }
+        else if (during)
+        {
+            <strong>今</strong><span>考試期間</span>
+        }
+        else
+        {
+            <strong>@Model.DaysToExam</strong><span>天後考試</span>
+        }
+    </div>
+    <div>
+        <h3>
+            @s.Title
+            @if (s.IsTentative) { <span class="pill pill-amber ms-1">暫定</span> }
+            @if (regOpen) { <span class="pill pill-red ms-1">報名中・剩 @Model.DaysToRegistrationEnd 天</span> }
+            else if (daysToRegStart > 0) { <span class="pill ms-1">@daysToRegStart 天後開放報名</span> }
+        </h3>
+        <div class="meta">
+            考試 <span class="num">@TaipeiDate.RocWithWeekday(s.ExamStart)</span>@if (s.ExamEnd != s.ExamStart) { <span class="num">～@TaipeiDate.RocWithWeekday(s.ExamEnd)</span> }
+            @if (s.RegistrationStart is { } r1 && s.RegistrationEnd is { } r2)
+            {
+                <span class="ms-2">報名 <span class="num">@TaipeiDate.Roc(r1)～@TaipeiDate.Roc(r2)</span></span>
+            }
+        </div>
+        @if (!string.IsNullOrEmpty(s.Note)) { <div class="meta">@s.Note</div> }
+        <div class="source">來源：<a href="@s.SourceUrl" target="_blank" rel="noopener">@s.SourceName</a></div>
+    </div>
+    <div>
+        @if (SignIn.IsSignedIn(User) && !past)
+        {
+            <form asp-controller="Calendar" asp-action="ToggleTarget" asp-route-id="@s.Id" method="post">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <button class="btn btn-sm @(Model.IsTarget ? "btn-red" : "btn-line")" type="submit" aria-pressed="@(Model.IsTarget ? "true" : "false")">
+                    @(Model.IsTarget ? "★ 我的目標" : "☆ 設為目標")
+                </button>
+            </form>
+        }
+    </div>
+</article>

@@ -1,0 +1,73 @@
+@model TakeVm
+@{
+    ViewData["Title"] = "批改結果";
+    var s = Model.Session;
+    var pct = s.TotalCount == 0 ? 0 : s.CorrectCount * 100 / s.TotalCount;
+    var wrongIdx = Model.Questions.Select((q, i) => (q, i)).Where(x => !Model.Answers.GetValueOrDefault(x.q.Id)?.IsCorrect ?? true).Select(x => x.i + 1).ToList();
+    string? lastPassage = null;
+}
+<div class="paper-head d-flex justify-content-between align-items-center gap-3">
+    <div style="min-width:0">
+        <p class="eyebrow mb-1">批改結果</p>
+        <h1 class="h3 mb-1">@s.Title</h1>
+        <p class="mb-2">答對 <strong class="num">@s.CorrectCount</strong> / <span class="num">@s.TotalCount</span> 題。答錯的題目已加入錯題本。</p>
+        @if (wrongIdx.Count > 0)
+        {
+            <p class="small mb-2">答錯：@foreach (var n in wrongIdx) { <a class="num me-1" href="#q@(n)">@n</a> }</p>
+        }
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-line" asp-controller="WrongBook" asp-action="Index">錯題本</a>
+            <a class="btn btn-line" asp-action="Index">回題庫</a>
+        </div>
+    </div>
+    <div class="score-stamp"><strong>@pct</strong><span>分（百分制）</span></div>
+</div>
+
+@for (var i = 0; i < Model.Questions.Count; i++)
+{
+    var q = Model.Questions[i];
+    var a = Model.Answers.GetValueOrDefault(q.Id);
+    var ok = a?.IsCorrect ?? false;
+    var selected = a?.Selected ?? "";
+    var multi = q.Type == QuestionType.Multiple;
+    <section class="q @(ok ? "result-correct" : "result-wrong")" id="q@(i + 1)">
+        @if (!string.IsNullOrEmpty(q.Passage))
+        {
+            if (q.Passage == lastPassage)
+            {
+                <details class="q-passage"><summary>題組文章（同上題）</summary>@QuestionText.Render(q.Passage)</details>
+            }
+            else
+            {
+                <div class="q-passage">@QuestionText.Render(q.Passage)</div>
+            }
+            lastPassage = q.Passage;
+        }
+        <div class="q-head">
+            <span class="q-no">@(i + 1).</span>
+            <div class="q-stem">
+                @if (multi) { <span class="pill pill-amber me-1">複選</span> }
+                @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依上方題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+            </div>
+        </div>
+        <ul class="opts">
+            @foreach (var (letter, text) in q.Options())
+            {
+                var isAns = q.Answer.Contains(letter);
+                var picked = selected.Contains(letter);
+                var cls = isAns ? "is-answer" : picked ? "is-wrong" : "";
+                <li class="opt @(multi ? "multi" : "") @cls">
+                    <label>
+                        <span class="letter">@letter</span>
+                        <span>@QuestionText.Render(text)@if (picked) { <span class="small text-muted ms-1">（你的選擇）</span> }</span>
+                    </label>
+                </li>
+            }
+        </ul>
+        <div class="q-foot">
+            <span>@(ok ? "✓ 答對" : string.IsNullOrEmpty(selected) ? "✗ 未作答" : $"✗ 你選 {selected}")・正解 <strong>@q.Answer</strong></span>
+            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
+            @if (Model.InWrongBook.Contains(q.Id)) { <span class="pill pill-red">在錯題本</span> }
+        </div>
+    </section>
+}

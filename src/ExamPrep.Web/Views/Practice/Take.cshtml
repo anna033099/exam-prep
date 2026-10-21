@@ -1,0 +1,57 @@
+@model TakeVm
+@{
+    ViewData["Title"] = "作答中";
+    string? lastPassage = null;
+}
+<div class="paper-head">
+    <p class="eyebrow mb-1">作答中</p>
+    <h1 class="h3 mb-1">@Model.Session.Title</h1>
+    <p class="small text-muted mb-0">單選題選一個答案；複選題（方形選框）須選出所有正確選項，全對才算答對。</p>
+</div>
+
+<form asp-action="Submit" asp-route-id="@Model.Session.Id" method="post" id="take-form" data-total="@Model.Questions.Count">
+    @for (var i = 0; i < Model.Questions.Count; i++)
+    {
+        var q = Model.Questions[i];
+        var multi = q.Type == QuestionType.Multiple;
+        <section class="q" id="q@(i + 1)">
+            @if (!string.IsNullOrEmpty(q.Passage))
+            {
+                if (q.Passage == lastPassage)
+                {
+                    <details class="q-passage"><summary>題組文章（同上題，點開重看）</summary>@QuestionText.Render(q.Passage)</details>
+                }
+                else
+                {
+                    <div class="q-passage">@QuestionText.Render(q.Passage)</div>
+                }
+                lastPassage = q.Passage;
+            }
+            <div class="q-head">
+                <span class="q-no">@(i + 1).</span>
+                <div class="q-stem">
+                    @if (multi) { <span class="pill pill-amber me-1">複選</span> }
+                    @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依上方題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+                </div>
+            </div>
+            <ul class="opts">
+                @foreach (var (letter, text) in q.Options())
+                {
+                    var id = $"q{q.Id}_{letter}";
+                    <li class="opt @(multi ? "multi" : "")">
+                        <label for="@id">
+                            <input type="@(multi ? "checkbox" : "radio")" id="@id" name="q_@q.Id" value="@letter" />
+                            <span class="letter">@letter</span>
+                            <span>@QuestionText.Render(text)</span>
+                        </label>
+                    </li>
+                }
+            </ul>
+            <div class="q-foot"><span>出處：@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</span></div>
+        </section>
+    }
+    <div class="submit-bar">
+        <span class="progress-text">已作答 <span id="answered-count">0 / @Model.Questions.Count</span></span>
+        <button class="btn btn-red btn-lg" type="submit">交卷批改</button>
+    </div>
+</form>

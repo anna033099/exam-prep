@@ -1,0 +1,82 @@
+﻿@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
+@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) => controller == c ? "active" : "";
+    var isAdmin = User.IsInRole(ExamPrep.Web.Data.AppInitializer.AdminRole);
+}
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"] is string t ? $"{t}｜備考簿" : "備考簿｜國考與國營事業備考")</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="brand" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark" aria-hidden="true">備</span>
+                <span class="brand-text">備考簿</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="切換選單">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link @Active("Calendar")" asp-controller="Calendar" asp-action="Index">考試行事曆</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Exams")" asp-controller="Exams" asp-action="Index">考試資訊</a></li>
+                    <li class="nav-item"><a class="nav-link @Active("Practice")" asp-controller="Practice" asp-action="Index">題庫練習</a></li>
+                    @if (SignIn.IsSignedIn(User))
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("WrongBook")" asp-controller="WrongBook" asp-action="Index">錯題本</a></li>
+                        <li class="nav-item"><a class="nav-link @Active("Study")" asp-controller="Study" asp-action="Index">讀書計畫</a></li>
+                    }
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item"><a class="nav-link @Active("Admin")" asp-controller="Admin" asp-action="Index">管理</a></li>
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @if (SignIn.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button class="nav-link btn btn-link" type="submit">登出</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Login">登入</a></li>
+                        <li class="nav-item"><a class="btn btn-ink btn-sm ms-lg-2" asp-controller="Account" asp-action="Register">註冊</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="container py-4">
+    @if (TempData["Flash"] is string flash)
+    {
+        <div class="flash" role="status">@flash</div>
+    }
+    @RenderBody()
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>試題取自<a href="https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx" target="_blank" rel="noopener">考選部考畢試題查詢平臺</a>公開之試題與標準答案；考期與科目資訊均標示來源，實際以各機關正式公告與簡章為準。</p>
+        <p><a asp-controller="Home" asp-action="About">關於本站與資料處理方式</a></p>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

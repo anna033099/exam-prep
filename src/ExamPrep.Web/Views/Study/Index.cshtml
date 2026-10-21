@@ -1,0 +1,125 @@
+@model StudyVm
+@{
+    ViewData["Title"] = "讀書計畫";
+    var max = Math.Max(Model.DailyGoalMinutes, Model.Last14Days.Count == 0 ? 0 : Model.Last14Days.Max(d => d.Minutes));
+    max = (int)(Math.Max(max, 60) * 1.15);
+    var goalBottom = Model.DailyGoalMinutes * 100.0 / max;
+    var todayTotal = Model.Last14Days.LastOrDefault()?.Minutes ?? 0;
+}
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="mb-1">讀書計畫</h1>
+        <p class="lead-muted mb-0">每科設定目標時數，每天記錄讀了多久。在<a asp-controller="Exams" asp-action="Index">考試資訊</a>頁可一鍵把某類科的應試科目加進來。</p>
+    </div>
+    <form asp-action="SetGoal" method="post" class="d-flex gap-2 align-items-center">
+        <label class="small text-muted text-nowrap" for="goal">每日目標</label>
+        <input class="form-control form-control-sm" style="width:5.5rem" type="number" id="goal" name="minutes" min="10" max="1200" step="10" value="@Model.DailyGoalMinutes" />
+        <span class="small text-muted">分</span>
+        <button class="btn btn-sm btn-line" type="submit">更新</button>
+    </form>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="sheet">
+            <div class="sheet-title"><h2>近 14 天</h2><span class="small text-muted">今天 <span class="num">@todayTotal</span> 分</span></div>
+            <div class="bars" role="img" aria-label="近 14 天每日讀書分鐘數長條圖">
+                <div class="goal-line" style="bottom:@goalBottom.ToString("0.#")%"><span>目標 @Model.DailyGoalMinutes 分</span></div>
+                @foreach (var d in Model.Last14Days)
+                {
+                    <div class="bar" title="@d.Date.ToString("MM/dd")：@d.Minutes 分">
+                        @foreach (var (color, minutes) in d.Parts)
+                        {
+                            <i style="height:@((minutes * 100.0 / max).ToString("0.##"))%;background:@color"></i>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="bar-labels">
+                @foreach (var d in Model.Last14Days) { <span>@d.Date.ToString("M/d")</span> }
+            </div>
+        </div>
+
+        <div class="sheet">
+            <div class="sheet-title"><h2>科目進度</h2></div>
+            @if (Model.Subjects.Count == 0)
+            {
+                <p class="text-muted">還沒有科目。可在下方新增，或到考試資訊頁按「加入讀書計畫」。</p>
+            }
+            @foreach (var p in Model.Subjects)
+            {
+                var pct = (int)Math.Round(p.Percent * 100);
+                <details class="mb-3">
+                    <summary class="d-flex justify-content-between align-items-center gap-2" style="list-style:none;cursor:pointer">
+                        <span><span class="swatch" style="background:@p.Subject.Color"></span>@p.Subject.Name</span>
+                        <span class="num small">@((p.TotalMinutes / 60.0).ToString("0.#")) / @p.Subject.TargetHours 小時・近 7 天 @((p.Last7Minutes / 60.0).ToString("0.#")) 小時</span>
+                    </summary>
+                    <div class="meter mt-1"><i style="width:@pct%;background:@p.Subject.Color"></i></div>
+                    <form asp-action="SaveSubject" method="post" class="row g-2 mt-2 align-items-end">
+                        <input type="hidden" name="Id" value="@p.Subject.Id" />
+                        <div class="col-sm-5"><label class="form-label small">名稱</label><input class="form-control form-control-sm" name="Name" value="@p.Subject.Name" required maxlength="100" /></div>
+                        <div class="col-sm-3"><label class="form-label small">目標時數</label><input class="form-control form-control-sm" type="number" name="TargetHours" value="@p.Subject.TargetHours" min="0" max="2000" /></div>
+                        <div class="col-sm-2"><label class="form-label small">顏色</label><input class="form-control form-control-sm form-control-color" type="color" name="Color" value="@p.Subject.Color" /></div>
+                        <div class="col-sm-2"><button class="btn btn-sm btn-line w-100" type="submit">儲存</button></div>
+                    </form>
+                    <form asp-action="ArchiveSubject" asp-route-id="@p.Subject.Id" method="post" class="mt-1">
+                        <button class="btn btn-link btn-sm p-0 text-muted" type="submit">封存此科目</button>
+                    </form>
+                </details>
+                @if (!p.Equals(Model.Subjects.Last())) { <hr class="my-2" style="border-color:var(--rule)" /> }
+            }
+            <form asp-action="SaveSubject" method="post" class="row g-2 align-items-end mt-2">
+                <div class="col-sm-5"><label class="form-label small" for="newName">新增科目</label><input class="form-control" id="newName" name="Name" required maxlength="100" placeholder="例如：行政學大意" /></div>
+                <div class="col-sm-3"><label class="form-label small" for="newHours">目標時數</label><input class="form-control" id="newHours" type="number" name="TargetHours" value="60" min="0" max="2000" /></div>
+                <div class="col-sm-2"><label class="form-label small" for="newColor">顏色</label><input class="form-control form-control-color" id="newColor" type="color" name="Color" value="#3b5b92" /></div>
+                <div class="col-sm-2"><button class="btn btn-ink w-100" type="submit">新增</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sheet">
+            <h2 class="h5">記錄讀書時間</h2>
+            @if (Model.Subjects.Count == 0)
+            {
+                <p class="text-muted small mb-0">先新增科目才能記錄。</p>
+            }
+            else
+            {
+                <form asp-action="Log" method="post">
+                    <div class="mb-2">
+                        <label class="form-label" for="logSubject">科目</label>
+                        <select class="form-select" id="logSubject" name="NewLog.StudySubjectId" required>
+                            @foreach (var p in Model.Subjects) { <option value="@p.Subject.Id">@p.Subject.Name</option> }
+                        </select>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-7"><label class="form-label" for="logDate">日期</label><input class="form-control" id="logDate" type="date" name="NewLog.Date" value="@Model.Today.ToString("yyyy-MM-dd")" max="@Model.Today.ToString("yyyy-MM-dd")" required /></div>
+                        <div class="col-5"><label class="form-label" for="logMin">分鐘</label><input class="form-control" id="logMin" type="number" name="NewLog.Minutes" value="60" min="1" max="1440" required /></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label" for="logNote">內容（選填）</label><input class="form-control" id="logNote" name="NewLog.Note" maxlength="300" placeholder="例如：行政法第 3 章、考古題 30 題" /></div>
+                    <button class="btn btn-ink w-100" type="submit">記錄</button>
+                </form>
+            }
+        </div>
+        <div class="sheet">
+            <h2 class="h5">最近紀錄</h2>
+            @if (Model.RecentLogs.Count == 0) { <p class="text-muted small mb-0">尚無紀錄。</p> }
+            <table class="table-paper">
+                @foreach (var l in Model.RecentLogs)
+                {
+                    <tr>
+                        <td class="num small">@l.Date.ToString("MM/dd")</td>
+                        <td><span class="swatch" style="background:@l.StudySubject!.Color"></span>@l.StudySubject.Name
+                            @if (!string.IsNullOrEmpty(l.Note)) { <div class="small text-muted">@l.Note</div> }
+                        </td>
+                        <td class="num small text-end">@l.Minutes 分</td>
+                        <td class="text-end">
+                            <form asp-action="DeleteLog" asp-route-id="@l.Id" method="post"><button class="btn btn-link btn-sm p-0 text-muted" type="submit" aria-label="刪除這筆紀錄" onclick="return confirm('刪除這筆紀錄？')">✕</button></form>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</div>

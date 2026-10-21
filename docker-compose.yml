@@ -1,0 +1,13 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      # 本機開發用密碼，請自行修改；正式環境請改用安全的密碼管理方式
+      MSSQL_SA_PASSWORD: "ChangeMe_Dev123"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+volumes:
+  sqldata:

@@ -1,0 +1,27 @@
+@model List<Exam>
+@{
+    ViewData["Title"] = "考試資訊";
+    var counts = (Dictionary<int, int>)ViewBag.PaperCounts;
+}
+<h1>考試資訊</h1>
+<p class="lead-muted">各考試的性質、應試科目與考期。國家考試由考選部辦理；郵局與中華電信為公司自辦甄試，報考資格與錄取方式不同。</p>
+
+@foreach (var group in Model.GroupBy(e => e.OrganizerType))
+{
+    <h2 class="mt-4">@(group.Key == OrganizerType.NationalExam ? "國家考試" : "國營／公營事業招考")</h2>
+    <div class="feature-grid">
+        @foreach (var e in group)
+        {
+            var papers = counts.GetValueOrDefault(e.Id);
+            <a class="sheet text-decoration-none text-reset d-block" asp-action="Detail" asp-route-slug="@e.Slug">
+                <div class="d-flex justify-content-between align-items-start">
+                    <h3 class="mb-1">@e.ShortName</h3>
+                    <span class="pill">@e.Organizer</span>
+                </div>
+                <p class="small text-muted mb-2">@e.Name</p>
+                <p class="small mb-2">@e.Summary</p>
+                <span class="small text-muted">@(papers > 0 ? $"題庫 {papers} 份試卷" : "題庫可由 CSV 匯入")・考期 @e.Sessions.Count 筆</span>
+            </a>
+        }
+    </div>
+}

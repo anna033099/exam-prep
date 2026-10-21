@@ -1,0 +1,59 @@
+@model QuestionPaper
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
+@{
+    ViewData["Title"] = Model.SubjectName;
+    var excluded = (List<SeedDataService.ExcludedSeed>)ViewBag.Excluded;
+    var count = (int)ViewBag.Count;
+}
+<p class="eyebrow mb-1"><a asp-action="Index">題庫</a> ／ @Model.RocYear 年</p>
+<h1>@Model.SubjectName</h1>
+<p class="lead-muted">@Model.RocYear 年 @Model.ExamTitle</p>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="sheet">
+            <table class="table-paper">
+                <tr><td class="text-muted">試題代號</td><td class="num">@Model.PaperCode</td></tr>
+                <tr><td class="text-muted">適用類科</td><td>@Model.Categories</td></tr>
+                <tr><td class="text-muted">收錄題數</td><td><span class="num">@count</span> ／ 官方 <span class="num">@Model.OfficialQuestionCount</span> 題</td></tr>
+                <tr><td class="text-muted">原始檔案</td><td><a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題 PDF ↗</a>　<a href="@Model.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF ↗</a></td></tr>
+            </table>
+            @if (!string.IsNullOrWhiteSpace(Model.AnswerNote))
+            {
+                <p class="small mt-3 mb-0"><strong>答案備註：</strong>@Model.AnswerNote</p>
+            }
+            <div class="mt-3">
+                @if (SignIn.IsSignedIn(User))
+                {
+                    <form asp-action="StartPaper" method="post" class="d-inline">
+                        <input type="hidden" name="paperId" value="@Model.Id" />
+                        <button class="btn btn-ink" type="submit">整卷作答（@count 題）</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn btn-ink" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@($"/Practice/Paper/{Model.Id}")">登入後作答</a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="sheet">
+            <h2 class="h5">未收錄的題目</h2>
+            @if (excluded.Count == 0)
+            {
+                <p class="text-muted mb-0">本卷所有題目皆已收錄。</p>
+            }
+            else
+            {
+                <p class="small text-muted">以下題目無法以純文字完整還原，為避免錯誤而不收錄，請直接看原始 PDF。</p>
+                <table class="table-paper">
+                    @foreach (var e in excluded)
+                    {
+                        <tr><td class="num">第 @e.No 題</td><td class="small">@e.Reason</td></tr>
+                    }
+                </table>
+            }
+        </div>
+    </div>
+</div>

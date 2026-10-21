@@ -1,0 +1,71 @@
+@model Exam
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
+@{
+    ViewData["Title"] = Model.ShortName;
+    var sessions = (List<CountdownItem>)ViewBag.Sessions;
+    var papers = (List<PaperRow>)ViewBag.Papers;
+}
+<p class="eyebrow mb-1"><a asp-action="Index">考試資訊</a> ／ @Model.Organizer</p>
+<h1>@Model.Name</h1>
+<p class="lead-muted">@Model.Summary</p>
+<p class="small"><a href="@Model.OfficialUrl" target="_blank" rel="noopener">主辦單位網站 ↗</a></p>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="sheet">
+            <div class="sheet-title"><h2>應試科目</h2></div>
+            @foreach (var track in Model.Subjects.OrderBy(s => s.SortOrder).GroupBy(s => s.Track))
+            {
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h3 class="mb-1">@track.Key</h3>
+                        @if (SignIn.IsSignedIn(User))
+                        {
+                            <form asp-controller="Study" asp-action="ImportSubjects" method="post">
+                                <input type="hidden" name="examId" value="@Model.Id" />
+                                <input type="hidden" name="track" value="@track.Key" />
+                                <button class="btn btn-sm btn-line" type="submit">加入讀書計畫</button>
+                            </form>
+                        }
+                    </div>
+                    <table class="table-paper">
+                        @foreach (var s in track)
+                        {
+                            <tr><td>@s.SubjectName</td><td class="text-end"><span class="pill">@s.Format</span></td></tr>
+                        }
+                    </table>
+                    <div class="small text-muted mt-1">來源：<a href="@track.First().SourceUrl" target="_blank" rel="noopener">@track.First().SourceName</a></div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="sheet">
+            <div class="sheet-title"><h2>考期</h2></div>
+            <div class="countdown-list">
+                @foreach (var c in sessions) { <partial name="_Countdown" model="c" /> }
+            </div>
+        </div>
+        <div class="sheet">
+            <div class="sheet-title"><h2>歷屆試題</h2><a asp-controller="Practice" asp-action="Index" asp-route-exam="@Model.Slug">題庫 →</a></div>
+            @if (papers.Count == 0)
+            {
+                <p class="text-muted mb-0">目前沒有收錄此考試的題目。考選部平臺不提供公司自辦甄試的試題，可由管理員依官方公告以 CSV 匯入。</p>
+            }
+            else
+            {
+                <table class="table-paper">
+                    @foreach (var p in papers.Take(12))
+                    {
+                        <tr>
+                            <td class="num">@p.RocYear</td>
+                            <td><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a></td>
+                            <td class="num text-end">@p.QuestionCount 題</td>
+                        </tr>
+                    }
+                </table>
+                @if (papers.Count > 12) { <p class="small text-muted mt-2 mb-0">共 @papers.Count 份，完整清單請到題庫。</p> }
+            }
+        </div>
+    </div>
+</div>

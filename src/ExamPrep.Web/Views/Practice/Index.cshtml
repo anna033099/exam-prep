@@ -1,0 +1,120 @@
+@model PracticeIndexVm
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
+@{ ViewData["Title"] = "題庫練習"; var signedIn = SignIn.IsSignedIn(User); }
+
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="mb-1">題庫練習</h1>
+        <p class="lead-muted mb-0">考選部公開的歷屆測驗題。可整卷作答，或選一個科目跨年度隨機抽題。</p>
+    </div>
+    @if (signedIn) { <a class="btn btn-line" asp-action="History">練習紀錄</a> }
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4 order-lg-2">
+        <div class="sheet">
+            <h2 class="h5">依科目隨機抽題</h2>
+            @if (signedIn)
+            {
+                <form asp-action="StartRandom" method="post">
+                    <div class="mb-2">
+                        <label class="form-label" for="subject">科目</label>
+                        <select class="form-select" id="subject" name="subject" required>
+                            @foreach (var (s, n) in Model.Subjects)
+                            {
+                                <option value="@s">@s（@n 題）</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label" for="count">題數</label>
+                        <select class="form-select" id="count" name="count">
+                            <option>10</option><option selected>20</option><option>30</option><option>50</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="unseenOnly" name="unseenOnly" value="true" />
+                        <label class="form-check-label" for="unseenOnly">只出沒做過的題目</label>
+                    </div>
+                    <button class="btn btn-ink w-100" type="submit">開始</button>
+                </form>
+            }
+            else
+            {
+                <p class="text-muted small mb-2">登入後即可作答並自動建立錯題本。</p>
+                <a class="btn btn-ink w-100" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Practice">登入</a>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-8 order-lg-1">
+        <form method="get" class="filters sheet mb-3" role="search">
+            <div>
+                <label class="form-label" for="exam">考試</label>
+                <select class="form-select" id="exam" name="exam">
+                    <option value="">全部</option>
+                    @foreach (var e in Model.Exams)
+                    {
+                        <option value="@e.Slug" selected="@(Model.Exam == e.Slug)">@e.ShortName</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label class="form-label" for="year">年度</label>
+                <select class="form-select" id="year" name="year">
+                    <option value="">全部</option>
+                    @foreach (var y in Model.Years)
+                    {
+                        <option value="@y" selected="@(Model.Year == y)">@y 年</option>
+                    }
+                </select>
+            </div>
+            <div class="flex-grow-1">
+                <label class="form-label" for="q">科目或類科關鍵字</label>
+                <input class="form-control" id="q" name="q" value="@Model.Q" placeholder="例如：行政學、資訊處理" />
+            </div>
+            <button class="btn btn-ink" type="submit">篩選</button>
+        </form>
+
+        <div class="sheet">
+            <div class="sheet-title"><h2 class="h5">試卷（@Model.Papers.Count）</h2></div>
+            @if (Model.Papers.Count == 0)
+            {
+                <p class="empty">沒有符合條件的試卷。</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                <table class="table-paper">
+                    <thead><tr><th>年度</th><th>科目</th><th>收錄</th><th></th></tr></thead>
+                    <tbody>
+                    @foreach (var p in Model.Papers)
+                    {
+                        <tr>
+                            <td class="num">@p.RocYear</td>
+                            <td>
+                                <a asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a>
+                                <div class="small text-muted">@p.ExamTitle</div>
+                            </td>
+                            <td class="num small">
+                                @p.QuestionCount/@p.OfficialCount
+                                @if (p.BestScore is { } b) { <div><span class="pill @(b >= 60 ? "pill-green" : "pill-red")">最佳 @b%</span></div> }
+                            </td>
+                            <td class="text-end">
+                                @if (signedIn)
+                                {
+                                    <form asp-action="StartPaper" method="post">
+                                        <input type="hidden" name="paperId" value="@p.Id" />
+                                        <button class="btn btn-sm btn-line" type="submit">作答</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

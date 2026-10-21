@@ -1,0 +1,101 @@
+﻿@model DashboardVm
+@{
+    ViewData["Title"] = "我的備考";
+    var goalPct = Model.DailyGoalMinutes == 0 ? 0 : Math.Min(100, Model.TodayMinutes * 100 / Model.DailyGoalMinutes);
+}
+
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+    <div>
+        <p class="eyebrow mb-1">我的備考</p>
+        <h1 class="mb-0">@(string.IsNullOrEmpty(Model.DisplayName) ? "你好" : $"{Model.DisplayName}，你好")</h1>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-line" asp-controller="Study" asp-action="Index">＋ 記錄讀書時間</a>
+        <a class="btn btn-ink" asp-controller="Practice" asp-action="Index">開始練習</a>
+    </div>
+</div>
+
+<div class="dash-grid">
+    <div class="metric">
+        <div class="label">今天讀書</div>
+        <div class="value">@Model.TodayMinutes<small> / @Model.DailyGoalMinutes 分</small></div>
+        <div class="meter" role="progressbar" aria-valuenow="@goalPct" aria-valuemin="0" aria-valuemax="100"><i style="width:@goalPct%"></i></div>
+    </div>
+    <div class="metric">
+        <div class="label">近 7 天合計</div>
+        <div class="value">@((Model.WeekMinutes / 60.0).ToString("0.#"))<small> 小時</small></div>
+        <div class="label mt-1">連續 @Model.StreakDays 天有讀書</div>
+    </div>
+    <div class="metric">
+        <div class="label">練習正確率</div>
+        <div class="value">@(Model.Accuracy is { } a ? (a * 100).ToString("0") : "—")<small>@(Model.Accuracy is null ? "" : " %")</small></div>
+        <div class="label mt-1">已作答 @Model.AnsweredCount 題</div>
+    </div>
+    <div class="metric">
+        <div class="label">待複習錯題</div>
+        <div class="value">@Model.OpenWrongCount<small> 題</small></div>
+        <a class="label mt-1 d-inline-block" asp-controller="WrongBook" asp-action="Index">打開錯題本 →</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="sheet">
+            <div class="sheet-title"><h2>目標考試倒數</h2><a asp-controller="Calendar" asp-action="Index">設定目標 →</a></div>
+            @if (Model.Targets.Count == 0)
+            {
+                <p class="text-muted mb-3">還沒有設定目標考試。到考試行事曆按「設為目標」，這裡就會倒數。</p>
+                @if (Model.NextExam is not null)
+                {
+                    <p class="eyebrow mb-2">最近的考試</p>
+                    <partial name="_Countdown" model="Model.NextExam" />
+                }
+            }
+            else
+            {
+                <div class="countdown-list">
+                    @foreach (var t in Model.Targets) { <partial name="_Countdown" model="t" /> }
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="sheet">
+            <div class="sheet-title"><h2>需要加強的科目</h2></div>
+            @if (Model.WeakSubjects.Count == 0)
+            {
+                <p class="text-muted mb-0">單一科目作答滿 10 題後，這裡會依正確率由低到高列出。</p>
+            }
+            else
+            {
+                @foreach (var s in Model.WeakSubjects)
+                {
+                    var pct = (int)Math.Round(s.Rate * 100);
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between"><span>@s.Subject</span><span class="num">@pct%（@s.Correct/@s.Answered）</span></div>
+                        <div class="meter @(pct < 60 ? "red" : "")"><i style="width:@pct%"></i></div>
+                    </div>
+                }
+            }
+        </div>
+        <div class="sheet">
+            <div class="sheet-title"><h2>最近的練習</h2><a asp-controller="Practice" asp-action="History">全部 →</a></div>
+            @if (Model.RecentSessions.Count == 0)
+            {
+                <p class="text-muted mb-0">還沒有交卷紀錄。</p>
+            }
+            else
+            {
+                <table class="table-paper">
+                    @foreach (var s in Model.RecentSessions)
+                    {
+                        <tr>
+                            <td><a asp-controller="Practice" asp-action="Result" asp-route-id="@s.Id">@s.Title</a></td>
+                            <td class="num text-end">@s.CorrectCount/@s.TotalCount</td>
+                        </tr>
+                    }
+                </table>
+            }
+        </div>
+    </div>
+</div>

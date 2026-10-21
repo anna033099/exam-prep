@@ -1,0 +1,60 @@
+@model List<ExamSession>
+@{
+    ViewData["Title"] = "管理";
+    var custom = (List<PaperRow>)ViewBag.Custom;
+}
+<h1>管理</h1>
+<div class="dash-grid">
+    <div class="metric"><div class="label">試卷</div><div class="value">@ViewBag.Papers</div></div>
+    <div class="metric"><div class="label">題目</div><div class="value">@ViewBag.Questions</div></div>
+    <div class="metric"><div class="label">會員</div><div class="value">@ViewBag.Users</div></div>
+    <div class="metric">
+        <div class="label">官方試題包</div>
+        <form asp-action="ReimportOfficial" method="post"><button class="btn btn-sm btn-line mt-2" type="submit">重新匯入（只新增）</button></form>
+    </div>
+</div>
+
+<div class="sheet">
+    <div class="sheet-title"><h2>考期維護</h2><a class="btn btn-sm btn-ink" asp-action="EditSession">＋ 新增考期</a></div>
+    <p class="small text-muted">官方公告新年度日期後在這裡新增；每筆都必須填寫來源。</p>
+    <div class="table-responsive">
+        <table class="table-paper">
+            <thead><tr><th>考試</th><th>名稱</th><th>考試日期</th><th>來源</th><th></th></tr></thead>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.Exam!.ShortName</td>
+                    <td>@s.Title @if (s.IsTentative) { <span class="pill pill-amber">暫定</span> }</td>
+                    <td class="num">@TaipeiDate.Roc(s.ExamStart)</td>
+                    <td class="small"><a href="@s.SourceUrl" target="_blank" rel="noopener">@s.SourceName</a></td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-line" asp-action="EditSession" asp-route-id="@s.Id">編輯</a>
+                        <form asp-action="DeleteSession" asp-route-id="@s.Id" method="post" class="d-inline"><button class="btn btn-sm btn-line" type="submit" onclick="return confirm('刪除「@s.Title」？')">刪除</button></form>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+<div class="sheet">
+    <div class="sheet-title"><h2>自行匯入的試卷</h2><a class="btn btn-sm btn-ink" asp-action="ImportCsv">＋ CSV 匯入</a></div>
+    @if (custom.Count == 0)
+    {
+        <p class="text-muted mb-0">尚未匯入。郵局、中華電信等非考選部的試題可用 CSV 加入。</p>
+    }
+    else
+    {
+        <table class="table-paper">
+            @foreach (var p in custom)
+            {
+                <tr>
+                    <td class="num">@p.RocYear</td>
+                    <td><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a><div class="small text-muted">@p.ExamTitle・代號 @p.PaperCode</div></td>
+                    <td class="num">@p.QuestionCount 題</td>
+                    <td class="text-end"><form asp-action="DeletePaper" asp-route-id="@p.Id" method="post"><button class="btn btn-sm btn-line" type="submit" onclick="return confirm('刪除此試卷與相關作答紀錄？')">刪除</button></form></td>
+                </tr>
+            }
+        </table>
+    }
+</div>

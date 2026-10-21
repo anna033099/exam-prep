@@ -1,0 +1,75 @@
+@model WrongBookVm
+@{ ViewData["Title"] = "錯題本"; }
+<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+    <div>
+        <h1 class="mb-1">錯題本</h1>
+        <p class="lead-muted mb-0">練習時答錯的題目會自動收進來；在重練時同一題連續答對 @PracticeService.MasteryStreak 次，就會標為「已熟練」。</p>
+    </div>
+    <form asp-action="Retry" method="post" class="d-flex gap-2 align-items-center">
+        <input type="hidden" name="subject" value="@Model.Subject" />
+        <select class="form-select form-select-sm w-auto" name="count" aria-label="題數">
+            <option>10</option><option selected>20</option><option>50</option>
+        </select>
+        <button class="btn btn-red" type="submit">重練@(Model.Subject is null ? "全部" : "此科")錯題</button>
+    </form>
+</div>
+
+<nav class="d-flex gap-2 flex-wrap mb-3" aria-label="科目">
+    <a class="pill @(Model.Subject is null ? "pill-red" : "")" asp-action="Index" asp-route-showMastered="@Model.ShowMastered">全部（@Model.Subjects.Sum(s => s.Open)）</a>
+    @foreach (var (s, n) in Model.Subjects)
+    {
+        <a class="pill @(Model.Subject == s ? "pill-red" : "")" asp-action="Index" asp-route-subject="@s" asp-route-showMastered="@Model.ShowMastered">@s（@n）</a>
+    }
+    <a class="pill ms-auto" asp-action="Index" asp-route-subject="@Model.Subject" asp-route-showMastered="@(!Model.ShowMastered)">@(Model.ShowMastered ? "隱藏已熟練" : "顯示已熟練")</a>
+</nav>
+
+@if (Model.Items.Count == 0)
+{
+    <div class="empty sheet">
+        <p class="mb-2">目前沒有錯題。</p>
+        <a class="btn btn-ink" asp-controller="Practice" asp-action="Index">去練習</a>
+    </div>
+}
+
+@foreach (var w in Model.Items)
+{
+    var q = w.Question!;
+    <section class="q @(w.Mastered ? "result-correct" : "result-wrong")" id="w@(w.Id)">
+        @if (!string.IsNullOrEmpty(q.Passage))
+        {
+            <details class="q-passage"><summary>題組文章</summary>@QuestionText.Render(q.Passage)</details>
+        }
+        <div class="q-head">
+            <span class="q-no">#@q.Number</span>
+            <div class="q-stem">
+                @if (q.Type == QuestionType.Multiple) { <span class="pill pill-amber me-1">複選</span> }
+                @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+            </div>
+        </div>
+        <ul class="opts">
+            @foreach (var (letter, text) in q.Options())
+            {
+                <li class="opt @(q.Answer.Contains(letter) ? "is-answer" : "")"><label><span class="letter">@letter</span><span>@QuestionText.Render(text)</span></label></li>
+            }
+        </ul>
+        <div class="q-foot">
+            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
+            <span>答錯 <strong class="num">@w.WrongCount</strong> 次・最近 <span class="num">@TaipeiDate.ToTaipeiTime(w.LastWrongAt).ToString("MM/dd")</span></span>
+            @if (w.Mastered) { <span class="pill pill-green">已熟練</span> }
+            else if (w.CorrectStreak > 0) { <span class="pill pill-amber">已連對 @w.CorrectStreak 次</span> }
+        </div>
+        <div class="q-foot">
+            <form asp-action="SaveNote" method="post" class="d-flex gap-2 flex-grow-1">
+                <input type="hidden" name="id" value="@w.Id" />
+                <input type="hidden" name="subject" value="@Model.Subject" />
+                <input class="form-control form-control-sm" name="note" value="@w.Note" maxlength="1000" placeholder="寫下為什麼錯、正確觀念…" aria-label="筆記" />
+                <button class="btn btn-sm btn-line" type="submit">存筆記</button>
+            </form>
+            <form asp-action="ToggleMastered" method="post">
+                <input type="hidden" name="id" value="@w.Id" />
+                <input type="hidden" name="subject" value="@Model.Subject" />
+                <button class="btn btn-sm btn-line" type="submit">@(w.Mastered ? "移回待複習" : "標為已熟練")</button>
+            </form>
+        </div>
+    </section>
+}

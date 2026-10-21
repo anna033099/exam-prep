@@ -1,0 +1,34 @@
+@model List<PracticeSession>
+@{ ViewData["Title"] = "練習紀錄"; }
+<h1>練習紀錄</h1>
+@if (Model.Count == 0)
+{
+    <p class="empty">還沒有練習紀錄。<a asp-action="Index">到題庫開始練習</a></p>
+}
+else
+{
+    <div class="sheet table-responsive">
+        <table class="table-paper">
+            <thead><tr><th>時間</th><th>內容</th><th class="text-end">成績</th></tr></thead>
+            <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td class="num small">@TaipeiDate.ToTaipeiTime(s.StartedAt).ToString("yyyy/MM/dd HH:mm")</td>
+                    <td>
+                        @if (s.FinishedAt is null)
+                        {
+                            <a asp-action="Take" asp-route-id="@s.Id">@s.Title</a> <span class="pill pill-amber">未交卷</span>
+                        }
+                        else
+                        {
+                            <a asp-action="Result" asp-route-id="@s.Id">@s.Title</a>
+                        }
+                    </td>
+                    <td class="num text-end">@(s.FinishedAt is null ? "—" : $"{s.CorrectCount}/{s.TotalCount}")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

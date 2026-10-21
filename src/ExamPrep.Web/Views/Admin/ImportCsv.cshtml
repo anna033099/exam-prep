@@ -1,0 +1,76 @@
+@model CsvImportVm
+@{ ViewData["Title"] = "CSV 匯入試題"; }
+<p class="eyebrow mb-1"><a asp-action="Index">管理</a></p>
+<h1>CSV 匯入試題</h1>
+<p class="lead-muted">用於考選部平臺以外的試題（例如郵局、中華電信官方公布的試題）。題目請照原卷逐字整理，並填寫取得試題的官方網址。</p>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <form asp-action="ImportCsv" method="post" enctype="multipart/form-data" class="sheet">
+            <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+            @if (Model.Errors.Count > 0)
+            {
+                <div class="flash"><strong>檔案有 @Model.Errors.Count 個問題，整份未匯入：</strong>
+                    <ul class="mb-0 small">@foreach (var e in Model.Errors.Take(30)) { <li>@e</li> }</ul>
+                </div>
+            }
+            <div class="row g-2">
+                <div class="col-md-6 mb-2">
+                    <label asp-for="ExamId" class="form-label"></label>
+                    <select asp-for="ExamId" class="form-select">
+                        <option value="">（不指定）</option>
+                        @foreach (var e in Model.Exams) { <option value="@e.Id">@e.ShortName</option> }
+                    </select>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label asp-for="RocYear" class="form-label"></label>
+                    <input asp-for="RocYear" class="form-control" />
+                </div>
+                <div class="col-12 mb-2">
+                    <label asp-for="ExamTitle" class="form-label"></label>
+                    <input asp-for="ExamTitle" class="form-control" placeholder="例如：中華郵政職階人員甄試" />
+                </div>
+                <div class="col-md-8 mb-2">
+                    <label asp-for="SubjectName" class="form-label"></label>
+                    <input asp-for="SubjectName" class="form-control" placeholder="例如：郵政三法大意及金融科技知識" />
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label asp-for="PaperCode" class="form-label"></label>
+                    <input asp-for="PaperCode" class="form-control" />
+                </div>
+                <div class="col-12 mb-2">
+                    <label asp-for="Categories" class="form-label"></label>
+                    <input asp-for="Categories" class="form-control" placeholder="例如：專業職(二)內勤" />
+                </div>
+                <div class="col-12 mb-2">
+                    <label asp-for="SourceUrl" class="form-label"></label>
+                    <input asp-for="SourceUrl" class="form-control" placeholder="https://" />
+                </div>
+                <div class="col-12 mb-3">
+                    <label asp-for="AnswerSourceUrl" class="form-label"></label>
+                    <input asp-for="AnswerSourceUrl" class="form-control" placeholder="與題目同一份則可留空" />
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="form-label" for="file">CSV 檔案（UTF-8）</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".csv,text/csv" required />
+                </div>
+            </div>
+            <button class="btn btn-ink" type="submit">驗證並匯入</button>
+        </form>
+    </div>
+    <div class="col-lg-5">
+        <div class="sheet">
+            <h2 class="h5">CSV 格式</h2>
+            <p class="small">第一列為欄位名稱：</p>
+            <pre class="small bg-white border rounded p-2">@string.Join(",", QuestionCsvImporter.Headers)</pre>
+            <ul class="small mb-2">
+                <li>題型填「單選」或「複選」。</li>
+                <li>答案填字母，複選如 <code>BD</code>。</li>
+                <li>E 與題組文章可留空。</li>
+                <li>任何一列有誤，整份都不會匯入，並列出錯誤列號。</li>
+            </ul>
+            <a class="btn btn-sm btn-line" asp-action="CsvTemplate">下載空白範本</a>
+        </div>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

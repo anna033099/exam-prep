@@ -1,0 +1,38 @@
+@{ ViewData["Title"] = "關於本站"; }
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1>關於備考簿</h1>
+        <p class="lead-muted">這是一個以 ASP.NET Core MVC 開發的備考工具，目標是讓準備初等、高普考、地方特考與國營事業招考的人，用同一個地方練題、整理錯題與管理讀書進度。</p>
+
+        <div class="sheet">
+            <h2>試題從哪裡來</h2>
+            <p>站內官方試題全部取自<a href="https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx" target="_blank" rel="noopener">考選部考畢試題查詢平臺</a>公開的試題 PDF 與「測驗式試題標準答案」PDF，經程式解析成文字題目。每份試卷頁面都附原始 PDF 連結，可隨時對照。</p>
+            <p class="mb-0">為避免錯誤題目混入，解析時遇到下列情況一律<strong>不收錄</strong>，並在試卷頁面列出題號與原因：</p>
+            <ul class="mb-0">
+                <li>題目含圖片、表格或公式圖形，純文字無法完整呈現。</li>
+                <li>選項數量不是 4 個（單選）或 5 個（複選）。</li>
+                <li>標準答案不是單純的選項字母（例如一律給分、更正答案）。</li>
+            </ul>
+        </div>
+
+        <div class="sheet">
+            <h2>考期與科目資訊</h2>
+            <p class="mb-0">每一筆考期與科目都標示來源。標為「暫定」者為官方計畫表中的預定日期，實際仍以考選部、中華郵政、中華電信等機關的正式公告與簡章為準。尚未公告的年度不會預先填入日期。</p>
+        </div>
+
+        <div class="sheet">
+            <h2>郵局、中華電信的題目</h2>
+            <p class="mb-0">這兩類招考的試題不在考選部平臺上。管理員可以從官方公告取得試題後，用「CSV 匯入」功能加入，匯入時必須填寫來源網址。</p>
+        </div>
+
+        <div class="sheet">
+            <h2>技術架構</h2>
+            <ul class="mb-0">
+                <li>ASP.NET Core MVC（.NET 10）、Entity Framework Core、SQL Server</li>
+                <li>ASP.NET Core Identity 會員登入、角色授權（管理員）</li>
+                <li>試題解析：Python（PyMuPDF）讀取 PDF 字元座標、選項標記與答案表</li>
+                <li>xUnit 單元測試：計分、CSV 驗證、錯題本規則</li>
+            </ul>
+        </div>
+    </div>
+</div>
