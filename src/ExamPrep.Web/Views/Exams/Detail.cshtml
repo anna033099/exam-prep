@@ -8,7 +8,7 @@
 <p class="eyebrow mb-1"><a asp-action="Index">考試資訊</a> ／ @Model.Organizer</p>
 <h1>@Model.Name</h1>
 <p class="lead-muted">@Model.Summary</p>
-<p class="small"><a href="@Model.OfficialUrl" target="_blank" rel="noopener">主辦單位網站 ↗</a></p>
+<p class="small"><a href="@Model.OfficialUrl" target="_blank" rel="noopener">主辦單位網站 </a></p>
 
 <div class="row g-3">
     <div class="col-lg-7">
@@ -47,10 +47,10 @@
             </div>
         </div>
         <div class="sheet">
-            <div class="sheet-title"><h2>歷屆試題</h2><a asp-controller="Practice" asp-action="Index" asp-route-exam="@Model.Slug">題庫 →</a></div>
+            <div class="sheet-title"><h2>歷屆試題</h2><a asp-controller="Practice" asp-action="Index" asp-route-exam="@Model.Slug">題庫</a></div>
             @if (papers.Count == 0)
             {
-                <p class="text-muted mb-0">目前沒有收錄此考試的題目。考選部平臺不提供公司自辦甄試的試題，可由管理員依官方公告以 CSV 匯入。</p>
+                <p class="text-muted mb-0">此考試沒有官方公開的歷屆試題（說明見上方簡介）。若日後主辦單位公告，管理員可依官方檔案以 CSV 匯入。</p>
             }
             else
             {

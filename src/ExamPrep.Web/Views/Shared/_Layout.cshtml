@@ -10,6 +10,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@(ViewData["Title"] is string t ? $"{t}｜備考簿" : "備考簿｜國考與國營事業備考")</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -18,7 +21,7 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="brand" asp-controller="Home" asp-action="Index">
-                <span class="brand-mark" aria-hidden="true">備</span>
+                <span class="brand-mark" aria-hidden="true"><i></i><i class="on"></i><i class="on"></i><i></i></span>
                 <span class="brand-text">備考簿</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="切換選單">
@@ -39,6 +42,10 @@
                         <li class="nav-item"><a class="nav-link @Active("Admin")" asp-controller="Admin" asp-action="Index">管理</a></li>
                     }
                 </ul>
+                <form class="header-search" method="get" asp-controller="Practice" asp-action="Index" role="search">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input name="q" type="search" placeholder="搜尋科目或類科" aria-label="搜尋科目或類科" />
+                </form>
                 <ul class="navbar-nav">
                     @if (SignIn.IsSignedIn(User))
                     {
@@ -69,7 +76,7 @@
 
 <footer class="site-footer">
     <div class="container">
-        <p>試題取自<a href="https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx" target="_blank" rel="noopener">考選部考畢試題查詢平臺</a>公開之試題與標準答案；考期與科目資訊均標示來源，實際以各機關正式公告與簡章為準。</p>
+        <p>試題取自<a href="https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx" target="_blank" rel="noopener">考選部考畢試題查詢平臺</a>，以及中華郵政委託<a href="https://svc.tabf.org.tw/115post02//Paper/Year" target="_blank" rel="noopener">台灣金融研訓院</a>公告之考古題（中華電信 101–103 年取自 1111 人力銀行轉載之研訓院原卷）；考期與科目資訊均標示來源，實際以各機關正式公告與簡章為準。</p>
         <p><a asp-controller="Home" asp-action="About">關於本站與資料處理方式</a></p>
     </div>
 </footer>

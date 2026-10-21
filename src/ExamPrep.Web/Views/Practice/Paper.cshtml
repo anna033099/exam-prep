@@ -16,8 +16,21 @@
                 <tr><td class="text-muted">試題代號</td><td class="num">@Model.PaperCode</td></tr>
                 <tr><td class="text-muted">適用類科</td><td>@Model.Categories</td></tr>
                 <tr><td class="text-muted">收錄題數</td><td><span class="num">@count</span> ／ 官方 <span class="num">@Model.OfficialQuestionCount</span> 題</td></tr>
-                <tr><td class="text-muted">原始檔案</td><td><a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題 PDF ↗</a>　<a href="@Model.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF ↗</a></td></tr>
+                <tr><td class="text-muted">原始檔案</td><td>
+                    @if (Model.SourceAnswerUrl == Model.SourceQuestionUrl)
+                    {
+                        <a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題與答案 PDF </a>
+                    }
+                    else
+                    {
+                        <a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題 PDF </a><span>　</span><a href="@Model.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF </a>
+                    }
+                </td></tr>
             </table>
+            @if (!string.IsNullOrWhiteSpace(Model.SourceNote))
+            {
+                <p class="small mt-3 mb-0"><strong>來源說明：</strong>@Model.SourceNote</p>
+            }
             @if (!string.IsNullOrWhiteSpace(Model.AnswerNote))
             {
                 <p class="small mt-3 mb-0"><strong>答案備註：</strong>@Model.AnswerNote</p>

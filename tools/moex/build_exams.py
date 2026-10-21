@@ -70,7 +70,7 @@ exams = [
     {
         'slug': 'post', 'name': '中華郵政職階人員甄試', 'shortName': '郵局招考', 'organizer': '中華郵政',
         'organizerType': 'StateEnterprise', 'sortOrder': 4, 'officialUrl': 'https://www.post.gov.tw/',
-        'summary': '中華郵政公司自辦的從業人員甄試（非國家考試），分營運職、專業職(一)、專業職(二)內勤／外勤，錄取後依分發區分發。',
+        'summary': '中華郵政公司自辦的從業人員甄試（非國家考試），試務委託台灣金融研訓院辦理，分營運職、專業職(一)、專業職(二)內勤／外勤，錄取後依分發區分發。官方於甄試網站公告近年試題與選擇題答案。',
         'sessions': [
             {'title': '115年中華郵政職階人員甄試', 'registrationStart': '2026-05-18', 'registrationEnd': '2026-06-10',
              'examStart': '2026-07-19', 'examEnd': '2026-07-19', 'isTentative': False,
@@ -91,7 +91,7 @@ exams = [
     {
         'slug': 'cht', 'name': '中華電信基層從業人員遴選', 'shortName': '中華電信', 'organizer': '中華電信',
         'organizerType': 'StateEnterprise', 'sortOrder': 5, 'officialUrl': 'https://www.cht.com.tw/',
-        'summary': '中華電信自辦遴選（非國家考試），第一試筆試普通科目占 20%、專業科目占 80%，雙北、臺中、高雄設考區。',
+        'summary': '中華電信自辦遴選（非國家考試），第一試筆試普通科目占 20%、專業科目占 80%，雙北、臺中、高雄設考區。101–109 年由台灣金融研訓院辦理，本站收錄 101–103 年研訓院版式的原卷（由 1111 人力銀行轉載保存）；近年改由松盟科技辦理，簡章明定「各節試卷一律回收，亦不公告試題及解答」，所以近年沒有公開試題。',
         'sessions': [
             {'title': '115年中華電信基層從業人員遴選', 'registrationStart': '2026-01-02', 'registrationEnd': '2026-02-02',
              'examStart': '2026-03-14', 'examEnd': '2026-03-14', 'isTentative': False,

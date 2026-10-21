@@ -80,6 +80,13 @@ def page_lines(page):
     return out, figures
 
 
+def join_text(a, b):
+    """接續換行文字：英數字之間補一個空格，中文直接相連。"""
+    if a and b and re.match(r'[A-Za-z0-9,.;:?!\'")\]’”]', a[-1]) and re.match(r'[A-Za-z0-9(\[‘“]', b[0]):
+        return a + ' ' + b
+    return a + b
+
+
 def group_lines(chars):
     chars = sorted(chars, key=lambda c: (round(c['yc']), c['x0']))
     lines = []
@@ -133,7 +140,7 @@ def parse_questions(pdf_path):
             m_num = None
             digits = ''
             for c in ln:
-                if c['x0'] < 58 and c['c'].isdigit():
+                if c['x0'] < 58 and c['c'] in '0123456789':
                     digits += c['c']
                 else:
                     break
@@ -207,7 +214,7 @@ def parse_questions(pdf_path):
                     if target == 'pending':
                         pending.append(t)
                     else:
-                        cur['stem'] += t
+                        cur['stem'] = join_text(cur['stem'], t)
                 elif target == 'pending':
                     pending.append(t)
                 else:
@@ -220,7 +227,7 @@ def parse_questions(pdf_path):
                         # pick option column by x
                         cands = [(k, v) for k, v in opt_x.items() if v[2] == opt_x[target][2] and v[0] <= x0 + 4]
                         key = max(cands, key=lambda kv: kv[1][0])[0] if cands else target
-                        cur['options'][key] += t
+                        cur['options'][key] = join_text(cur['options'][key], t)
             for mk, buf in segs[1:]:
                 letter, mx = mk
                 tx = buf[0]['x0'] if buf else mx + 10
@@ -243,25 +250,30 @@ def parse_questions(pdf_path):
 
 def parse_answers(pdf_path):
     doc = fitz.open(pdf_path)
-    words = []
-    full = ''
+    words, full = [], ''
     for page in doc:
         full += page.get_text()
         words += [w for w in page.get_text('words')]
-    nums = {}
+    # 題號列：新版「第N題」；舊版（101–103 年）「題號 01 02 …」
     rows = {}
     for w in words:
         x0, y0, x1, y1, t = w[:5]
         m = re.match(r'^第(\d+)題$', t)
         if m:
-            nums.setdefault(round(y0), []).append((int(m.group(1)), (x0 + x1) / 2))
-    # answer tokens appear on the line right below each 題號 row
-    ys = sorted(nums)
+            rows.setdefault(round(y0), []).append((int(m.group(1)), (x0 + x1) / 2))
+    for w in words:
+        if w[4] == '題號':
+            y = round(w[1])
+            nums = [(int(v[4]), (v[0] + v[2]) / 2) for v in words
+                    if abs(v[1] - w[1]) < 3 and v[0] > w[2] and re.fullmatch(r'\d{1,3}', v[4])]
+            if nums:
+                rows.setdefault(y, []).extend(nums)
     ans = {}
-    for y in ys:
-        cols = nums[y]
-        below = [w for w in words if 4 < w[1] - y < 22 and w[4] != '答案']
+    for y, cols in rows.items():
+        below = [w for w in words if 4 < w[1] - y < 22 and w[4] not in ('答案',)]
         for w in below:
+            if not re.fullmatch(r'[A-E#]+|[A-E]或[A-E]', w[4]):
+                continue
             cx = (w[0] + w[2]) / 2
             no, _ = min(cols, key=lambda c: abs(c[1] - cx))
             ans[no] = w[4]
@@ -273,12 +285,18 @@ def parse_answers(pdf_path):
     for k, pat in [('single', r'單選題數：\s*(\d+)'), ('multi', r'複選題數：\s*(\d+)')]:
         mm = re.search(pat, full)
         meta[k] = int(mm.group(1)) if mm else 0
+    if meta['single'] == 0 and meta['multi'] == 0:
+        mm = re.search(r'題\s*數：\s*(\d+)\s*題', full)
+        if mm:
+            meta['single'] = int(mm.group(1))
     return ans, note, meta
 
 
 def clean(s):
     s = re.sub(r'\[/u\]\[u\]', '', s)
+    s = re.sub(r'\[u\]\s*\[/u\]', '＿＿＿', s)
     s = re.sub(r'\s+', ' ', s).strip()
+    s = re.sub(r'(?<=[\u2e80-\u9fff\u3000-\u303f\uff00-\uffef])\s+(?=[\u2e80-\u9fff\u3000-\u303f\uff00-\uffef])', '', s)
     s = re.sub(r'(?<=[A-Za-z,.;])＿＿＿', ' ＿＿＿', s)
     s = re.sub(r'＿＿＿(?=[A-Za-z])', '＿＿＿ ', s)
     return s

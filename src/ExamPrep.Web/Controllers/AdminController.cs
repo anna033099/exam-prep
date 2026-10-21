@@ -17,7 +17,7 @@ public class AdminController(AppDbContext db, QuestionCsvImporter csv, SeedDataS
         ViewBag.Questions = await db.Questions.CountAsync();
         ViewBag.Users = await db.Users.CountAsync();
         var sessions = await db.ExamSessions.Include(s => s.Exam).OrderByDescending(s => s.ExamStart).ToListAsync();
-        var custom = await db.Papers.Where(p => !p.SourceQuestionUrl.Contains("moex.gov.tw"))
+        var custom = await db.Papers.Where(p => p.ExamCode.StartsWith("CUSTOM-"))
             .OrderByDescending(p => p.ImportedAt).Select(p => new PaperRow
             {
                 Id = p.Id, RocYear = p.RocYear, ExamTitle = p.ExamTitle, SubjectName = p.SubjectName,
@@ -92,7 +92,7 @@ public class AdminController(AppDbContext db, QuestionCsvImporter csv, SeedDataS
     [HttpPost]
     public async Task<IActionResult> DeletePaper(int id)
     {
-        var p = await db.Papers.FirstOrDefaultAsync(x => x.Id == id && !x.SourceQuestionUrl.Contains("moex.gov.tw"));
+        var p = await db.Papers.FirstOrDefaultAsync(x => x.Id == id && x.ExamCode.StartsWith("CUSTOM-"));
         if (p is null) return NotFound();
         var qids = db.Questions.Where(q => q.PaperId == id).Select(q => q.Id);
         db.PracticeAnswers.RemoveRange(db.PracticeAnswers.Where(a => qids.Contains(a.QuestionId)));

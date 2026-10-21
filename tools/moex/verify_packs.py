@@ -7,13 +7,24 @@ def norm(s):
     s = s.replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s-]', '', s)
 
+
+def poppler_text(pdf):
+    import subprocess
+    t = ''
+    for mode in ([], ['-layout']):
+        out = subprocess.run(['pdftotext', *mode, pdf, '-'], capture_output=True, text=True).stdout
+        out = '\n'.join(l for l in out.splitlines() if not re.search(r'代號[:：]|頁次[:：]', l))
+        t += norm(out.replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝')) + '\n'
+    return t + '\n' + norm(''.join(b[4] for pg in fitz.open(pdf) for b in pg.get_text('blocks') if not re.search('代號：|頁次：', b[4])).replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝'))
+
+
 def answers_layout(pdf):
     t = subprocess.run(['pdftotext', '-layout', pdf, '-'], capture_output=True, text=True).stdout.splitlines()
     out = {}
     for i, line in enumerate(t):
-        nums = re.findall(r'第(\d+)題', line)
-        if nums and i + 1 < len(t) and t[i + 1].startswith('答案'):
-            vals = t[i + 1][2:].split()
+        nums = re.findall(r'第(\d+)題', line) or (re.findall(r'\b(\d{1,3})\b', line) if line.strip().startswith('題號') else [])
+        if nums and i + 1 < len(t) and t[i + 1].strip().startswith('答案'):
+            vals = t[i + 1].strip()[2:].split()
             for n, v in zip(nums, vals):
                 out[int(n)] = v
     return out
@@ -22,8 +33,7 @@ stats = collections.Counter(); bad_text = []; bad_ans = []
 for f in sorted(glob.glob('packs/papers_*.json')):
     for p in json.load(open(f, encoding='utf-8')):
         m = man[(p['examCode'], p['sourceQuestionUrl'].replace('https://wwwq.moex.gov.tw/exam/', ''))]
-        full = norm(''.join(b[4] for pg in fitz.open(m['q_pdf']) for b in pg.get_text('blocks') if not re.search('代號：|頁次：', b[4])).replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝'))
-        full = re.sub(r'代號：[0-9\-]*?頁次：\d+－\d+', '', full)
+        full = poppler_text(m['q_pdf'])
         ans = answers_layout(m['a_pdf'])
         for q in p['questions']:
             stats['q'] += 1

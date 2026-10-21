@@ -1,120 +1,130 @@
 @model PracticeIndexVm
 @inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignIn
-@{ ViewData["Title"] = "題庫練習"; var signedIn = SignIn.IsSignedIn(User); }
+@{
+    ViewData["Title"] = "題庫練習";
+    var signedIn = SignIn.IsSignedIn(User);
+    var examName = Model.Exams.FirstOrDefault(e => e.Slug == Model.Exam)?.ShortName;
+}
 
-<div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-3">
+<div class="list-head">
     <div>
         <h1 class="mb-1">題庫練習</h1>
-        <p class="lead-muted mb-0">考選部公開的歷屆測驗題。可整卷作答，或選一個科目跨年度隨機抽題。</p>
+        <p class="lead-muted mb-0">初等、高普考、地方特考 101–115 年，郵局 111–114 年，中華電信 101–103 年的歷屆選擇題。</p>
     </div>
     @if (signedIn) { <a class="btn btn-line" asp-action="History">練習紀錄</a> }
 </div>
 
-<div class="row g-3">
-    <div class="col-lg-4 order-lg-2">
-        <div class="sheet">
-            <h2 class="h5">依科目隨機抽題</h2>
-            @if (signedIn)
+<div class="browse mt-3">
+    <aside class="side" aria-label="篩選">
+        <h2>考試</h2>
+        <a class="cat @(Model.Exam is null ? "on" : "")" asp-action="Index" asp-route-year="@Model.Year" asp-route-q="@Model.Q">全部 <small>@Model.AllPaperCount</small></a>
+        @foreach (var e in Model.Exams)
+        {
+            <a class="cat @(Model.Exam == e.Slug ? "on" : "")" asp-action="Index" asp-route-exam="@e.Slug" asp-route-year="@Model.Year" asp-route-q="@Model.Q">@e.ShortName <small>@Model.ExamPaperCounts.GetValueOrDefault(e.Slug)</small></a>
+        }
+        <hr />
+        <h2>年度</h2>
+        <div class="years">
+            <a class="pill @(Model.Year is null ? "pill-red" : "")" asp-action="Index" asp-route-exam="@Model.Exam" asp-route-q="@Model.Q">全部</a>
+            @foreach (var y in Model.Years)
             {
-                <form asp-action="StartRandom" method="post">
-                    <div class="mb-2">
-                        <label class="form-label" for="subject">科目</label>
-                        <select class="form-select" id="subject" name="subject" required>
-                            @foreach (var (s, n) in Model.Subjects)
-                            {
-                                <option value="@s">@s（@n 題）</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label" for="count">題數</label>
-                        <select class="form-select" id="count" name="count">
-                            <option>10</option><option selected>20</option><option>30</option><option>50</option>
-                        </select>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="unseenOnly" name="unseenOnly" value="true" />
-                        <label class="form-check-label" for="unseenOnly">只出沒做過的題目</label>
-                    </div>
-                    <button class="btn btn-ink w-100" type="submit">開始</button>
-                </form>
-            }
-            else
-            {
-                <p class="text-muted small mb-2">登入後即可作答並自動建立錯題本。</p>
-                <a class="btn btn-ink w-100" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Practice">登入</a>
+                <a class="pill @(Model.Year == y ? "pill-red" : "")" asp-action="Index" asp-route-exam="@Model.Exam" asp-route-year="@y" asp-route-q="@Model.Q">@y</a>
             }
         </div>
-    </div>
+        <hr />
+        <h2>依科目隨機抽題</h2>
+        @if (signedIn)
+        {
+            <form asp-action="StartRandom" method="post">
+                <label class="form-label visually-hidden" for="subject">科目</label>
+                <select class="form-select mb-2" id="subject" name="subject" required>
+                    @foreach (var (s, n) in Model.Subjects)
+                    {
+                        <option value="@s">@s（@n 題）</option>
+                    }
+                </select>
+                <div class="d-flex gap-2 align-items-center mb-2">
+                    <label class="small text-muted" for="count">題數</label>
+                    <select class="form-select form-select-sm" id="count" name="count">
+                        <option>10</option><option selected>20</option><option>30</option><option>50</option>
+                    </select>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="unseenOnly" name="unseenOnly" value="true" />
+                    <label class="form-check-label small" for="unseenOnly">只出沒做過的題目</label>
+                </div>
+                <button class="btn btn-ink w-100" type="submit">開始</button>
+            </form>
+        }
+        else
+        {
+            <p class="text-muted small mb-2">登入後就能作答，答錯的題目會自動收進錯題本。</p>
+            <a class="btn btn-ink w-100" asp-controller="Account" asp-action="Login" asp-route-returnUrl="/Practice">登入</a>
+        }
+    </aside>
 
-    <div class="col-lg-8 order-lg-1">
-        <form method="get" class="filters sheet mb-3" role="search">
-            <div>
-                <label class="form-label" for="exam">考試</label>
-                <select class="form-select" id="exam" name="exam">
-                    <option value="">全部</option>
-                    @foreach (var e in Model.Exams)
-                    {
-                        <option value="@e.Slug" selected="@(Model.Exam == e.Slug)">@e.ShortName</option>
-                    }
-                </select>
-            </div>
-            <div>
-                <label class="form-label" for="year">年度</label>
-                <select class="form-select" id="year" name="year">
-                    <option value="">全部</option>
-                    @foreach (var y in Model.Years)
-                    {
-                        <option value="@y" selected="@(Model.Year == y)">@y 年</option>
-                    }
-                </select>
-            </div>
-            <div class="flex-grow-1">
-                <label class="form-label" for="q">科目或類科關鍵字</label>
-                <input class="form-control" id="q" name="q" value="@Model.Q" placeholder="例如：行政學、資訊處理" />
-            </div>
-            <button class="btn btn-ink" type="submit">篩選</button>
+    <section>
+        <form method="get" class="hero-search mt-0 mb-3" role="search" style="max-width:none;box-shadow:none">
+            <input type="hidden" name="exam" value="@Model.Exam" />
+            <input type="hidden" name="year" value="@Model.Year" />
+            <input id="q" name="q" value="@Model.Q" type="search" placeholder="搜尋科目或類科，例如：行政學、資訊處理" aria-label="搜尋科目或類科" />
+            <button class="btn btn-ink" type="submit">搜尋</button>
         </form>
 
-        <div class="sheet">
-            <div class="sheet-title"><h2 class="h5">試卷（@Model.Papers.Count）</h2></div>
-            @if (Model.Papers.Count == 0)
-            {
-                <p class="empty">沒有符合條件的試卷。</p>
-            }
-            else
-            {
-                <div class="table-responsive">
-                <table class="table-paper">
-                    <thead><tr><th>年度</th><th>科目</th><th>收錄</th><th></th></tr></thead>
-                    <tbody>
-                    @foreach (var p in Model.Papers)
-                    {
-                        <tr>
-                            <td class="num">@p.RocYear</td>
-                            <td>
-                                <a asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a>
-                                <div class="small text-muted">@p.ExamTitle</div>
-                            </td>
-                            <td class="num small">
-                                @p.QuestionCount/@p.OfficialCount
-                                @if (p.BestScore is { } b) { <div><span class="pill @(b >= 60 ? "pill-green" : "pill-red")">最佳 @b%</span></div> }
-                            </td>
-                            <td class="text-end">
-                                @if (signedIn)
-                                {
-                                    <form asp-action="StartPaper" method="post">
-                                        <input type="hidden" name="paperId" value="@p.Id" />
-                                        <button class="btn btn-sm btn-line" type="submit">作答</button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
-                </div>
-            }
+        <div class="list-head">
+            <div class="text-muted">
+                @(examName ?? "全部考試")@(Model.Year is { } yy ? $"・{yy} 年" : "")@(string.IsNullOrEmpty(Model.Q) ? "" : $"・「{Model.Q}」")，共 <strong class="num">@Model.Total</strong> 份試卷
+            </div>
+            @if (Model.PageCount > 1) { <span class="small text-muted num">第 @Model.Page / @Model.PageCount 頁</span> }
         </div>
-    </div>
+
+        @if (Model.Papers.Count == 0)
+        {
+            <div class="empty sheet">
+                <p class="mb-2">沒有符合條件的試卷。</p>
+                <a class="btn btn-line" asp-action="Index">清除篩選</a>
+            </div>
+        }
+        else
+        {
+            <div class="paper-list">
+                @foreach (var p in Model.Papers)
+                {
+                    var cats = p.Categories.Split('、', StringSplitOptions.RemoveEmptyEntries);
+                    <div class="paper-row">
+                        <div class="yr">@p.RocYear<small>年</small></div>
+                        <div>
+                            <a class="name" asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a>
+                            <div class="sub">
+                                @p.ExamTitle@if (cats.Length > 0) { <text>｜@string.Join("、", cats.Take(2))@(cats.Length > 2 ? $" 等 {cats.Length} 類" : "")</text> }
+                            </div>
+                            <div class="sub">收錄 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</div>
+                        </div>
+                        <div class="act">
+                            @if (p.BestScore is { } b) { <span class="pill @(b >= 60 ? "pill-green" : "pill-wrong")">最佳 @b%</span> }
+                            @if (signedIn)
+                            {
+                                <form asp-action="StartPaper" method="post">
+                                    <input type="hidden" name="paperId" value="@p.Id" />
+                                    <button class="btn btn-sm btn-ink" type="submit">作答</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a class="btn btn-sm btn-line" asp-action="Paper" asp-route-id="@p.Id">查看</a>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            @if (Model.PageCount > 1)
+            {
+                <nav class="pager" aria-label="分頁">
+                    <a class="btn btn-sm btn-line @(Model.Page <= 1 ? "disabled" : "")" asp-action="Index" asp-route-exam="@Model.Exam" asp-route-year="@Model.Year" asp-route-q="@Model.Q" asp-route-page="@(Model.Page - 1)">上一頁</a>
+                    <span class="small text-muted num">@Model.Page / @Model.PageCount</span>
+                    <a class="btn btn-sm btn-line @(Model.Page >= Model.PageCount ? "disabled" : "")" asp-action="Index" asp-route-exam="@Model.Exam" asp-route-year="@Model.Year" asp-route-q="@Model.Q" asp-route-page="@(Model.Page + 1)">下一頁</a>
+                </nav>
+            }
+        }
+    </section>
 </div>

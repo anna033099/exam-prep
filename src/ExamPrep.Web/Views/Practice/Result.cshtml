@@ -20,7 +20,7 @@
             <a class="btn btn-line" asp-action="Index">回題庫</a>
         </div>
     </div>
-    <div class="score-stamp"><strong>@pct</strong><span>分（百分制）</span></div>
+    <div class="score-stamp @(pct < 60 ? "low" : "")"><strong>@pct</strong><span>分（百分制）</span></div>
 </div>
 
 @for (var i = 0; i < Model.Questions.Count; i++)

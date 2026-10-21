@@ -17,8 +17,21 @@ public class HomeController(AppDbContext db, UserManager<ApplicationUser> users,
         if (userId is null)
         {
             var all = await countdown.AllAsync(null);
+            var exams = await db.Exams.OrderBy(e => e.SortOrder).AsNoTracking().ToListAsync();
+            var stats = await db.Papers.Where(p => p.ExamId != null)
+                .GroupBy(p => p.ExamId!.Value)
+                .Select(g => new { g.Key, Papers = g.Count(), Questions = g.Sum(p => p.Questions.Count), First = g.Min(p => p.RocYear), Last = g.Max(p => p.RocYear) })
+                .ToDictionaryAsync(x => x.Key);
+            // 首頁示範題：隨機挑一題題幹短、無題組文章的單選題
+            var candidates = db.Questions.Where(q => q.Type == QuestionType.Single && q.Passage == null && q.Stem.Length < 70
+                                                      && q.OptionA.Length < 30 && q.OptionB.Length < 30 && q.OptionC.Length < 30 && q.OptionD.Length < 30);
+            var n = await candidates.CountAsync();
+            var sample = n == 0 ? null : await candidates.Include(q => q.Paper).OrderBy(q => q.Id).Skip(Random.Shared.Next(n)).FirstOrDefaultAsync();
             return View("Landing", new LandingVm
             {
+                ExamStats = exams.Select(e => stats.TryGetValue(e.Id, out var x)
+                    ? new ExamStat(e, x.Papers, x.Questions, x.First, x.Last) : new ExamStat(e, 0, 0, 0, 0)).ToList(),
+                Sample = sample,
                 PaperCount = await db.Papers.CountAsync(),
                 QuestionCount = await db.Questions.CountAsync(),
                 ExamCount = await db.Exams.CountAsync(),

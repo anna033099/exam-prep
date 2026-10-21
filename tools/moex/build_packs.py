@@ -10,6 +10,18 @@ def norm(s):
     return re.sub(r'[\s\ue000-\uf8ff]', '', s)
 
 
+def poppler_text(pdf):
+    import subprocess
+    t = ''
+    for mode in ([], ['-layout']):
+        out = subprocess.run(['pdftotext', *mode, pdf, '-'], capture_output=True, text=True).stdout
+        out = '\n'.join(l for l in out.splitlines() if not re.search(r'代號[:：]|頁次[:：]', l))
+        t += norm(out.replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝')) + '\n'
+    return t + '\n' + norm(''.join(b[4] for pg in fitz.open(pdf) for b in pg.get_text('blocks') if not re.search('代號：|頁次：', b[4])).replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝'))
+
+
+
+CODES = json.load(open('codes_101_115.json', encoding='utf-8'))
 SLUG = {'010': 'chudeng', '080': 'gaopu', '190': 'local', '200': 'local'}
 out_dir = sys.argv[1]
 os.makedirs(out_dir, exist_ok=True)
@@ -30,8 +42,7 @@ for m in manifest:
         continue
     r = build(m['q_pdf'], m['a_pdf'])
     # 獨立比對：題幹、選項、題組文章須逐字出現在原卷文字中，否則排除
-    full = norm(''.join(b[4] for pg in fitz.open(m['q_pdf']) for b in pg.get_text('blocks') if not re.search('代號：|頁次：', b[4])).replace('\uf02d', '－').replace('\uf02b', '＋').replace('\uf03d', '＝'))
-    full = re.sub(r'代號：[0-9\-]*?頁次：\d+－\d+', '', full)
+    full = poppler_text(m['q_pdf'])
     keep = []
     for q in r['questions']:
         parts = [q['stem'], *q['options'].values(), q['passage'] or '']
@@ -42,9 +53,9 @@ for m in manifest:
     r['questions'] = keep
     r['excluded'].sort(key=lambda e: e['no'])
     roc = int(m['exam_code'][:3])
-    exam_title = TITLES[m['exam_code'][3:]]
+    exam_title = re.sub(r'^\d+年', '', CODES[m['exam_code']][1])
     paper = {
-        'examCode': m['exam_code'], 'paperCode': code, 'examSlug': SLUG[m['exam_code'][3:]],
+        'examCode': m['exam_code'], 'paperCode': code, 'examSlug': m['kind'],
         'examTitle': exam_title, 'rocYear': roc,
         'categories': list(m['categories']), 'subjectName': m['subject'],
         'sourceQuestionUrl': m['q_url'], 'sourceAnswerUrl': m['a_url'],

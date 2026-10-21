@@ -91,6 +91,19 @@ with sync_playwright() as p:
     assert page.locator('section.q').count() == 10
     log.append('依科目隨機抽 10 題：OK')
 
+    # 郵局官方試題：整卷作答、題組文章顯示
+    page.goto(BASE + '/Practice?exam=post&q=國文')
+    assert page.locator('button:has-text("作答")').count() > 0, '找不到郵局試卷'
+    page.locator('button:has-text("作答")').first.click()
+    page.wait_for_url(re.compile(r'/Practice/Take/\d+'))
+    np = page.locator('.q-passage').count()
+    page.click('button:has-text("交卷批改")')
+    page.wait_for_url(re.compile(r'/Practice/Result/\d+'))
+    log.append(f'郵局國文英文卷作答與批改（含 {np} 段題組文章）：OK')
+    page.goto(BASE + '/Practice?page=2')
+    assert '第 2 /' in page.content()
+    log.append('題庫分頁：OK')
+
     # 讀書計畫
     page.goto(BASE + '/Study')
     page.fill('#logMin', '90'); page.fill('#logNote', '行政學大意 考古題')

@@ -111,6 +111,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
                     SourceQuestionUrl = p.SourceQuestionUrl,
                     SourceAnswerUrl = p.SourceAnswerUrl,
                     AnswerNote = p.AnswerNote ?? "",
+                    SourceNote = p.SourceNote ?? "",
                     OfficialQuestionCount = p.OfficialQuestionCount,
                     ExcludedJson = JsonSerializer.Serialize(p.Excluded),
                     ImportedAt = DateTime.UtcNow,
@@ -194,6 +195,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         public string SourceQuestionUrl { get; set; } = "";
         public string SourceAnswerUrl { get; set; } = "";
         public string? AnswerNote { get; set; }
+        public string? SourceNote { get; set; }
         public int OfficialQuestionCount { get; set; }
         public List<ExcludedSeed> Excluded { get; set; } = new();
         public List<QuestionSeed> Questions { get; set; } = new();

@@ -14,7 +14,10 @@ public class PracticeService(AppDbContext db, TimeProvider clock)
         var paper = await db.Papers.AsNoTracking().FirstAsync(p => p.Id == paperId);
         var ids = await db.Questions.Where(q => q.PaperId == paperId).OrderBy(q => q.Number)
             .Select(q => q.Id).ToListAsync();
-        return await SaveAsync(userId, $"{paper.RocYear}年 {paper.ExamTitle}｜{paper.SubjectName}", ids);
+        var s = await SaveAsync(userId, $"{paper.RocYear}年 {paper.ExamTitle}｜{paper.SubjectName}", ids);
+        s.PaperId = paperId;
+        await db.SaveChangesAsync();
+        return s;
     }
 
     /// <summary>依科目名稱跨年度隨機抽題。科目名稱完全相同才算同一科（例如「行政學大意」）。</summary>

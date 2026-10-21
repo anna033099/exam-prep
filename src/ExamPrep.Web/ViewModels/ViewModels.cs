@@ -57,8 +57,12 @@ public record SubjectAccuracy(string Subject, int Answered, int Correct)
     public double Rate => Answered == 0 ? 0 : (double)Correct / Answered;
 }
 
+public record ExamStat(Exam Exam, int Papers, int Questions, int FirstYear, int LastYear);
+
 public class LandingVm
 {
+    public List<ExamStat> ExamStats { get; set; } = new();
+    public Question? Sample { get; set; }
     public int PaperCount { get; set; }
     public int QuestionCount { get; set; }
     public int ExamCount { get; set; }
@@ -89,6 +93,10 @@ public class PaperRow
 
 public class PracticeIndexVm
 {
+    public const int PageSize = 50;
+    public int Page { get; set; } = 1;
+    public int PageCount { get; set; } = 1;
+    public int Total { get; set; }
     public string? Exam { get; set; }
     public int? Year { get; set; }
     public string? Q { get; set; }
@@ -96,6 +104,8 @@ public class PracticeIndexVm
     public List<int> Years { get; set; } = new();
     public List<PaperRow> Papers { get; set; } = new();
     public List<(string Subject, int Count)> Subjects { get; set; } = new();
+    public Dictionary<string, int> ExamPaperCounts { get; set; } = new();
+    public int AllPaperCount { get; set; }
 }
 
 public class TakeVm
@@ -174,7 +184,7 @@ public class CsvImportVm
     [Required(ErrorMessage = "請填寫科目"), StringLength(200), Display(Name = "科目")]
     public string SubjectName { get; set; } = "";
 
-    [StringLength(500), Display(Name = "適用類科／職階")]
+    [StringLength(2000), Display(Name = "適用類科／職階")]
     public string? Categories { get; set; }
 
     [Required(ErrorMessage = "請填寫試卷代號"), StringLength(30), Display(Name = "試卷代號")]

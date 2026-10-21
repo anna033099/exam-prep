@@ -288,6 +288,9 @@ namespace ExamPrep.Web.Data.Migrations
                     b.Property<DateTime?>("FinishedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("PaperId")
+                        .HasColumnType("int");
+
                     b.Property<string>("QuestionIds")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -386,8 +389,8 @@ namespace ExamPrep.Web.Data.Migrations
 
                     b.Property<string>("Categories")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("ExamCode")
                         .IsRequired()
@@ -421,6 +424,11 @@ namespace ExamPrep.Web.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SourceAnswerUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("SourceNote")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");

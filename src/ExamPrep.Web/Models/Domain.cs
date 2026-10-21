@@ -122,7 +122,7 @@ public class QuestionPaper
     /// <summary>民國年。</summary>
     public int RocYear { get; set; }
 
-    [MaxLength(500)]
+    [MaxLength(2000)]
     public string Categories { get; set; } = "";
 
     [MaxLength(200)]
@@ -136,6 +136,10 @@ public class QuestionPaper
 
     [MaxLength(2000)]
     public string AnswerNote { get; set; } = "";
+
+    /// <summary>來源說明，例如原公告單位與轉載網站。考選部試題留空。</summary>
+    [MaxLength(500)]
+    public string SourceNote { get; set; } = "";
 
     public int OfficialQuestionCount { get; set; }
 
@@ -198,6 +202,9 @@ public class PracticeSession
     public DateTime? FinishedAt { get; set; }
     public int TotalCount { get; set; }
     public int CorrectCount { get; set; }
+
+    /// <summary>整卷練習時對應的試卷；隨機抽題與錯題重練為 null。</summary>
+    public int? PaperId { get; set; }
 
     /// <summary>出題順序（題目 Id，以逗號分隔），讓作答頁與結果頁一致。</summary>
     public string QuestionIds { get; set; } = "";
