@@ -1453,12 +1453,25 @@
    "sortOrder": 49
   },
   {
+   "slug": "econ",
+   "name": "經濟部所屬事業機構新進職員甄試",
+   "shortName": "經濟部聯招",
+   "organizer": "經濟部所屬事業機構",
+   "organizerType": "StateEnterprise",
+   "summary": "台電、中油、台水、台糖等經濟部所屬事業機構聯合辦理的新進職員甄試。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.moea.gov.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "國營事業",
+   "sortOrder": 50
+  },
+  {
    "slug": "post",
    "name": "中華郵政職階人員甄試",
    "shortName": "郵局招考",
    "organizer": "中華郵政",
    "organizerType": "StateEnterprise",
-   "sortOrder": 50,
+   "sortOrder": 51,
    "officialUrl": "https://www.post.gov.tw/",
    "summary": "中華郵政公司自辦的從業人員甄試（非國家考試），試務委託台灣金融研訓院辦理，分營運職、專業職(一)、專業職(二)內勤／外勤，錄取後依分發區分發。官方於甄試網站公告近年試題與選擇題答案。",
    "sessions": [
@@ -1547,7 +1560,7 @@
    "shortName": "中華電信",
    "organizer": "中華電信",
    "organizerType": "StateEnterprise",
-   "sortOrder": 51,
+   "sortOrder": 52,
    "officialUrl": "https://www.cht.com.tw/",
    "summary": "中華電信自辦遴選（非國家考試），第一試筆試普通科目占 20%、專業科目占 80%，雙北、臺中、高雄設考區。101–109 年由台灣金融研訓院辦理，本站收錄 101–103 年研訓院版式的原卷（由 1111 人力銀行轉載保存）；近年改由松盟科技辦理，簡章明定「各節試卷一律回收，亦不公告試題及解答」，所以近年沒有公開試題。",
    "sessions": [
@@ -1664,6 +1677,58 @@
     }
    ],
    "group": "國營事業"
+  },
+  {
+   "slug": "sugar",
+   "name": "台灣糖業股份有限公司新進工員甄試",
+   "shortName": "台糖招考",
+   "organizer": "台灣糖業公司",
+   "organizerType": "StateEnterprise",
+   "summary": "台灣糖業公司自辦的新進工員甄試。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.taisugar.com.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "國營事業",
+   "sortOrder": 53
+  },
+  {
+   "slug": "ttl",
+   "name": "臺灣菸酒股份有限公司從業職員及從業評價職位人員甄試",
+   "shortName": "臺灣菸酒招考",
+   "organizer": "臺灣菸酒公司",
+   "organizerType": "StateEnterprise",
+   "summary": "臺灣菸酒公司自辦的從業職員及從業評價職位人員甄試。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.ttl.com.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "國營事業",
+   "sortOrder": 54
+  },
+  {
+   "slug": "irrig",
+   "name": "灌溉管理組織新進農田水利事業人員甄試",
+   "shortName": "農田水利招考",
+   "organizer": "農業部農田水利署",
+   "organizerType": "StateEnterprise",
+   "summary": "灌溉管理組織（各地管理處）辦理的新進農田水利事業人員甄試。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.ia.gov.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "國營事業",
+   "sortOrder": 55
+  },
+  {
+   "slug": "finance",
+   "name": "台灣金融研訓院金融專業能力測驗（授信、外匯、理財、信託等）",
+   "shortName": "金融證照",
+   "organizer": "台灣金融研訓院",
+   "organizerType": "Certification",
+   "summary": "台灣金融研訓院辦理的金融專業能力測驗；本站收錄研訓院網站公布的歷屆試題。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.tabf.org.tw/LicenseHistoryExam.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "財稅・金融",
+   "sortOrder": 56
   }
  ]
 }

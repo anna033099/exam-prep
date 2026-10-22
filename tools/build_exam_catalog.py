@@ -12,9 +12,21 @@ PATH = os.path.join(ROOT, 'src', 'ExamPrep.Web', 'SeedData', 'exams.json')
 MOEX_Q = 'https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx'
 # 非考選部類別（國營事業、證照、升學、其他招考）：(slug, 名稱, 簡稱, 群組, 主辦, 類型, 官方網址)
 EXTRA = [
+    ('econ', '經濟部所屬事業機構新進職員甄試', '經濟部聯招', '國營事業', '經濟部所屬事業機構', 'StateEnterprise', 'https://www.moea.gov.tw/'),
     ('post', None, None, '國營事業', None, None, None),
     ('cht', None, None, '國營事業', None, None, None),
+    ('sugar', '台灣糖業股份有限公司新進工員甄試', '台糖招考', '國營事業', '台灣糖業公司', 'StateEnterprise', 'https://www.taisugar.com.tw/'),
+    ('ttl', '臺灣菸酒股份有限公司從業職員及從業評價職位人員甄試', '臺灣菸酒招考', '國營事業', '臺灣菸酒公司', 'StateEnterprise', 'https://www.ttl.com.tw/'),
+    ('irrig', '灌溉管理組織新進農田水利事業人員甄試', '農田水利招考', '國營事業', '農業部農田水利署', 'StateEnterprise', 'https://www.ia.gov.tw/'),
+    ('finance', '台灣金融研訓院金融專業能力測驗（授信、外匯、理財、信託等）', '金融證照', '財稅・金融', '台灣金融研訓院', 'Certification', 'https://www.tabf.org.tw/LicenseHistoryExam.aspx'),
 ]
+SUMMARY = {
+    'econ': '台電、中油、台水、台糖等經濟部所屬事業機構聯合辦理的新進職員甄試。',
+    'sugar': '台灣糖業公司自辦的新進工員甄試。',
+    'ttl': '臺灣菸酒公司自辦的從業職員及從業評價職位人員甄試。',
+    'irrig': '灌溉管理組織（各地管理處）辦理的新進農田水利事業人員甄試。',
+    'finance': '台灣金融研訓院辦理的金融專業能力測驗；本站收錄研訓院網站公布的歷屆試題。',
+}
 data = json.load(open(PATH, encoding='utf-8'))
 by = {e['slug']: e for e in data['exams']}
 order = 0
@@ -31,7 +43,13 @@ for slug, name, short, group in CATEGORIES:
     e['sortOrder'] = order
 for slug, name, short, group, org, typ, url in EXTRA:
     order += 1
-    e = by[slug]
+    e = by.get(slug)
+    if e is None:
+        e = {'slug': slug, 'name': name, 'shortName': short, 'organizer': org, 'organizerType': typ,
+             'summary': SUMMARY[slug] + '這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。',
+             'officialUrl': url, 'sessions': [], 'subjects': []}
+        data['exams'].append(e)
+        by[slug] = e
     e['group'] = group
     e['sortOrder'] = order
 data['exams'].sort(key=lambda e: e['sortOrder'])

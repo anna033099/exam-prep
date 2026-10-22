@@ -87,6 +87,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         var dir = Path.Combine(SeedDir, "papers");
         if (!Directory.Exists(dir)) return new(0, 0, 0, 0, 0);
         var examIds = await db.Exams.ToDictionaryAsync(e => e.Slug, e => e.Id, ct);
+        var withheldSlugs = await WithheldSlugsAsync(ct);
         var existing = (await db.Papers.Select(p => new { p.ExamCode, p.PaperCode }).ToListAsync(ct))
             .Select(p => (p.ExamCode, p.PaperCode)).ToHashSet();
         var bulk = db.Database.IsSqlServer();
@@ -106,7 +107,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
                     skipped++;
                     continue;
                 }
-                var withheld = site.Value.IsWithheld(p.ExamSlug);
+                var withheld = withheldSlugs.Contains(p.ExamSlug);
                 var paper = new QuestionPaper
                 {
                     ContentWithheld = withheld,
@@ -164,6 +165,17 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         return new(0, 0, papers, questions, skipped);
     }
 
+    /// <summary>
+    /// 公開模式下不提供內文的考試：設定檔列出的，加上所有非考選部辦理的考試（國營事業、證照等，
+    /// 試題著作權屬主辦單位；考選部國家考試試題依著作權法第 9 條不受保護）。
+    /// </summary>
+    private async Task<HashSet<string>> WithheldSlugsAsync(CancellationToken ct)
+    {
+        if (!site.Value.PublicMode) return [];
+        var other = await db.Exams.Where(e => e.OrganizerType != OrganizerType.NationalExam).Select(e => e.Slug).ToListAsync(ct);
+        return site.Value.WithheldExamSlugs.Concat(other).ToHashSet();
+    }
+
     private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max];
 
     /// <summary>SQL Server 上用 SqlBulkCopy 寫入題目：題庫有數十萬題，逐筆 INSERT 太慢。</summary>
@@ -194,7 +206,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
     public async Task<int> PurgeWithheldContentAsync(CancellationToken ct = default)
     {
         if (!site.Value.PublicMode) return 0;
-        var slugs = site.Value.WithheldExamSlugs;
+        var slugs = (await WithheldSlugsAsync(ct)).ToList();
         var papers = db.Papers.Where(p => p.Exam != null && slugs.Contains(p.Exam.Slug));
         var qids = db.Questions.Where(q => papers.Select(p => p.Id).Contains(q.PaperId)).Select(q => q.Id);
         if (!await qids.AnyAsync(ct))

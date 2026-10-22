@@ -13,8 +13,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from taxonomy import classify
 
 BASE = 'https://wwwq.moex.gov.tw/exam/'
-args = [a for a in sys.argv[1:] if not a.startswith('--')]
-workers = int(sys.argv[sys.argv.index('--workers') + 1]) if '--workers' in sys.argv else 3
+import argparse
+_ap = argparse.ArgumentParser()
+_ap.add_argument('prefixes', nargs='*')
+_ap.add_argument('--workers', type=int, default=3)
+_a = _ap.parse_args()
+args, workers = _a.prefixes, _a.workers
 CODES = json.load(open(os.environ.get('MOEX_CODES', 'codes.json'), encoding='utf-8'))
 os.makedirs('pdf', exist_ok=True)
 local = threading.local()
@@ -58,8 +62,8 @@ for code in sorted(CODES):
             continue
         q = it['q'].replace('&amp;', '&')
         a = it['a'].replace('&amp;', '&') if it['a'] else None
-        s = re.search(r'&s=(\d+)', q).group(1)
-        c = re.search(r'&c=(\d+)', q).group(1)
+        s = re.search(r'&s=(\w+)', q).group(1)
+        c = re.search(r'&c=(\w+)', q).group(1)
         cat = it['category'] or ''
         key = (code, s)
         slug = classify(title, cat)

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/claude/ExamPrep/tools/moex/download_full.py", line 22, in <module>
+    CODES = json.load(open(os.environ.get('MOEX_CODES', 'codes.json'), encoding='utf-8'))
+                      ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'all_codes.json'

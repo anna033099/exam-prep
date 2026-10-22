@@ -126,6 +126,7 @@
                                     @if (p.OfficialCount > 0) { <text>選擇題 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</text> }
                                     @if (p.OfficialCount > 0 && p.EssayCount > 0) { <text>・</text> }
                                     @if (p.EssayCount > 0) { <text>申論題 <span class="num">@p.EssayCount</span> 題</text> }
+                                    @if (p.OfficialCount == 0 && p.EssayCount == 0 && p.QuestionCount == 0) { <text>只提供原卷連結（掃描檔或無法轉成文字）</text> }
                                 </div>
                             }
                         </div>

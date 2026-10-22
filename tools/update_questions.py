@@ -9,7 +9,7 @@
 
 用法：python tools/update_questions.py [--work 暫存資料夾] [--skip-post]
 """
-import argparse, glob, hashlib, json, os, shutil, subprocess, sys, tempfile, time
+import argparse, glob, gzip, hashlib, json, os, re, shutil, subprocess, sys, tempfile, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOLS = os.path.join(ROOT, 'tools')
@@ -36,7 +36,7 @@ def run(cmd, cwd, env=None):
 
 # ---------------- 考選部 ----------------
 def discover(year):
-    """回傳 {代碼: [西元年, 考試名稱]}，只保留初等、高普考、地方特考。"""
+    """回傳 {代碼: [西元年, 考試名稱]}（考選部該年度全部考試）。"""
     import requests
     from bs4 import BeautifulSoup
     from moex_search import URL, fields
@@ -51,11 +51,8 @@ def discover(year):
             soup = BeautifulSoup(s.post(URL, data=d, timeout=60).text, 'html.parser')
             out = {}
             for o in soup.find('select', {'name': 'ctl00$holderContent$ddlExamCode'}).find_all('option'):
-                t = o.text.strip()
-                if not o.get('value') or '專技' in t or '升官' in t or '升資' in t:
-                    continue
-                if '初等考試' in t or '高等考試三級考試暨普通考試' in t or ('特種考試地方政府公務人員考試' in t and t.index('特種') < 8):
-                    out[o['value']] = [year, t]
+                if o.get('value'):
+                    out[o['value']] = [year, o.text.strip()]
             return out
         except Exception as e:  # 網路或頁面暫時錯誤時重試
             print('查詢失敗，重試', e, flush=True)
@@ -65,7 +62,7 @@ def discover(year):
 
 codes_path = os.path.join(TOOLS, 'moex', 'codes.json')
 codes = json.load(open(codes_path, encoding='utf-8'))
-have = {os.path.basename(f)[len('papers_'):-len('.json')] for f in glob.glob(os.path.join(SEED, 'papers_*.json'))}
+have = {re.sub(r'\.json(\.gz)?$', '', os.path.basename(f))[len('papers_'):] for f in glob.glob(os.path.join(SEED, 'papers_*.json*'))}
 this_year = time.localtime().tm_year
 years = [int(y) for y in args.years.split(',')] if args.years else [this_year - 1, this_year]
 found = {}
@@ -82,28 +79,50 @@ if new:
     json.dump(new, open(nc, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     env = {'MOEX_CODES': nc}
     run([sys.executable, os.path.join(TOOLS, 'moex', 'index_all.py')], mw, env)
-    run([sys.executable, os.path.join(TOOLS, 'moex', 'download_all.py')], mw, env)
-    b = run([sys.executable, os.path.join(TOOLS, 'moex', 'build_packs.py'), 'packs'], mw, env)
-    v = run([sys.executable, os.path.join(TOOLS, 'moex', 'verify_packs.py'), 'packs'], mw, env)
-    produced = sorted(glob.glob(os.path.join(mw, 'packs', 'papers_*.json')))
-    if b.returncode != 0 or v.returncode != 0:
+    run([sys.executable, os.path.join(TOOLS, 'moex', 'download_full.py'), '--workers', '3'], mw, env)
+    b = run([sys.executable, os.path.join(TOOLS, 'moex', 'build_full.py'), 'packs', '--workers', '2'], mw, env)
+    if b.returncode != 0:
         failed = True
-        summary.append(f'- ❌ 驗證未通過，本次不寫入。驗證輸出：`{v.stdout.strip()[:500]}`')
+        summary.append(f'- ❌ 解析失敗，本次不寫入：`{b.stderr.strip()[-500:]}`')
     else:
-        total = 0
-        for f in produced:
-            papers = json.load(open(f, encoding='utf-8'))
+        # build_full 已逐題比對原卷文字、答案用兩種方法交叉核對，不一致的題目排除並註明原因
+        summary.append(f'- 解析結果：{b.stdout.strip().splitlines()[-2] if b.stdout.strip() else ""}')
+        for f in sorted(glob.glob(os.path.join(mw, 'packs', 'papers_*.json.gz'))):
+            papers = json.load(gzip.open(f, 'rt', encoding='utf-8'))
             n = sum(len(p['questions']) for p in papers)
-            if n == 0:
-                continue  # 該考試尚未公布測驗題答案，下個月再試
+            e = sum(len(p.get('essays', [])) for p in papers)
+            code = os.path.basename(f)[len('papers_'):-len('.json.gz')]
+            if n + e == 0:
+                continue  # 尚未公布試題，下個月再試
             shutil.copy(f, SEED)
-            code = os.path.basename(f)[len('papers_'):-len('.json')]
             codes[code] = new[code]
-            total += n
-            summary.append(f'- ✅ {new[code][1]}：{len(papers)} 份試卷、{n} 題（逐題驗證通過）')
+            summary.append(f'- ✅ {new[code][1]}：{len(papers)} 份試卷、選擇題 {n} 題、申論題 {e} 題')
         json.dump(dict(sorted(codes.items())), open(codes_path, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
-        if total == 0:
-            summary.append('- 新考試尚無可收錄的測驗題（可能尚未公布標準答案），下次再檢查。')
+
+# ---------------- 台灣金融研訓院金融證照 ----------------
+summary.append('')
+summary.append('## 金融證照（台灣金融研訓院歷屆試題）')
+tw = os.path.join(work, 'tabf_license')
+os.makedirs(tw, exist_ok=True)
+d = run([sys.executable, os.path.join(TOOLS, 'generic', 'download_tabf_license.py')], tw)
+if d.returncode != 0:
+    summary.append('- ⚠️ 研訓院網站暫時無法連線，本次略過')
+else:
+    b = run([sys.executable, os.path.join(TOOLS, 'generic', 'build_tabf_license.py'), 'manifest.json', 'packs'], tw)
+    f = os.path.join(tw, 'packs', 'papers_TABF-license.json.gz')
+    if b.returncode != 0 or not os.path.exists(f):
+        failed = True
+        summary.append('- ❌ 解析失敗，本次不寫入')
+    else:
+        # 研訓院只保留最近幾屆；和既有題庫合併（同代碼的試卷不重複），舊屆次不刪除
+        dst = os.path.join(SEED, 'papers_TABF-license.json.gz')
+        old = json.load(gzip.open(dst, 'rt', encoding='utf-8')) if os.path.exists(dst) else []
+        keys = {(p['examCode'], p['paperCode']) for p in old}
+        fresh = [p for p in json.load(gzip.open(f, 'rt', encoding='utf-8')) if (p['examCode'], p['paperCode']) not in keys]
+        if fresh:
+            with gzip.open(dst, 'wt', encoding='utf-8') as fp:
+                json.dump(old + fresh, fp, ensure_ascii=False, separators=(',', ':'))
+        summary.append(f'- 新增 {len(fresh)} 份試卷' if fresh else '- 沒有新的屆次')
 
 # ---------------- 中華郵政 ----------------
 if not args.skip_post:

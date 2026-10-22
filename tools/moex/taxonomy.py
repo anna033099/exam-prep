@@ -124,6 +124,27 @@ TITLE_RULES = [
 
 
 GENERIC = {'pro_other', 'engineer'}
+
+# 早年（民國 81–100 年）的考試名稱：類科欄位多半是空的，只能看考試名稱。名稱裡只對到一種時才採用，
+# 對到多種（合併舉辦）時回傳 None，交給 build_full.py 讀試卷第一頁的「等別」判斷。
+OLD_TITLE_RULES = [
+    ('postpromo', r'郵政人員升資'),
+    ('railpromo', r'鐵路人員升資|鐵路、公路人員升資'),
+    ('portpromo', r'港務人員升資'),
+    ('highwaypromo', r'公路人員升資'),
+    ('special_other', r'電信人員升資|電信、水運、民航人員升資|檢定考試|銓定資格'),
+    ('policepromo', r'警察人員升官等'),
+    ('customspromo', r'關務人員升官等'),
+    ('promo', r'(?<!警察人員)(?<!關務人員)升(官)?等考試|公務人員升官等'),
+    ('local', r'基層公務人員|地方政府(三、四等|公務人員)|離島地區'),
+    ('gaopu12', r'高考一級|高等考試一級|高等一、二級|高考一、二級'),
+    ('gaopu', r'高等暨普通考試|高考三級暨普考|高等考試三級(考試)?(暨|及)普通考試|高等三級及普考'),
+    ('chudeng', r'初等考試'),
+    ('disability', r'殘障|身心障礙'),
+    ('indigenous', r'原住民'),
+    ('veteran', r'退除役'),
+    ('pro_other', r'航海人員|漁船船員|船舶電信|驗船師|引水人'),
+]
 SINGLE_TITLE = [
     ('chudeng', r'初等考試'),
     ('gaopu12', r'高等考試一級暨二級'),
@@ -170,6 +191,8 @@ def classify(title, category):
         return hit
     if re.fullmatch(r'(高員三級|高員級|員級|佐級)(考試)?', prefix) and '鐵路' in tnorm:
         return 'railway'
+    if re.fullmatch(r'(高考三級|普考|普通考試|高考二級|高考一級)(考試)?', prefix) and re.search(r'高等考試三級|高考三級|高等三級|高考一級|高等一', tnorm):
+        return 'gaopu12' if '高考一級' in prefix or '高考二級' in prefix else 'gaopu'
     if '專利商標' in prefix:
         return 'special_other'
     if '外交' in prefix:
@@ -188,6 +211,11 @@ def classify(title, category):
     hit = _match(category, True)
     if hit:
         return hit
+    kinds = {slug for slug, pat in OLD_TITLE_RULES if re.search(pat, tnorm)}
+    if len(kinds) == 1:
+        return kinds.pop()
+    if kinds:
+        return None
     if re.search(r'專技|專門職業', tnorm):
         return 'pro_other'
     return None
