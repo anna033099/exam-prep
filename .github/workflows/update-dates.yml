@@ -1,7 +1,7 @@
 name: 每月更新考期
 
 # 每月 6 日 03:27 UTC（台灣時間 11:27）從考選部的政府資料開放資料集更新初等、高普考、地方特考考期。
-# 欄位或日期格式不符就整批不寫入；有變更才提交並重新部署。也可以在 Actions 頁面手動執行。
+# 欄位或日期格式不符就整批不寫入；有變更才提交。也可以在 Actions 頁面手動執行。
 on:
   schedule:
     - cron: "27 3 6 * *"
@@ -61,9 +61,12 @@ jobs:
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-  deploy:
+  # 機器人推送的提交不會觸發其他工作流程，所以題庫有變更時直接呼叫展示版發布
+  pages:
     needs: update
     if: needs.update.outputs.changed == 'true'
-    uses: ./.github/workflows/deploy-hf.yml
-    secrets:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml

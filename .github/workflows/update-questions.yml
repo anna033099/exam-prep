@@ -1,7 +1,7 @@
 name: 每月更新題庫
 
 # 每月 5 日 03:17 UTC（台灣時間 11:17）檢查考選部與台灣金融研訓院有沒有新試題；
-# 新題目逐題驗證通過才寫入，提交到 main 後重新部署。也可以在 Actions 頁面手動執行。
+# 新題目逐題驗證通過才寫入，提交到 main（GitHub Pages 展示版會自動重新發布）。也可以在 Actions 頁面手動執行。
 on:
   schedule:
     - cron: "17 3 5 * *"
@@ -62,9 +62,12 @@ jobs:
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
-  deploy:
+  # 機器人推送的提交不會觸發其他工作流程，所以題庫有變更時直接呼叫展示版發布
+  pages:
     needs: update
     if: needs.update.outputs.changed == 'true'
-    uses: ./.github/workflows/deploy-hf.yml
-    secrets:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml

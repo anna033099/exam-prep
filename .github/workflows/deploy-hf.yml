@@ -3,18 +3,10 @@ name: 部署到 Hugging Face Space
 # 需要的設定（GitHub repo → Settings → Secrets and variables → Actions）：
 #   Secrets：HF_TOKEN   Hugging Face 的 write 權杖
 #   Variables：HF_SPACE  例如 anna033099/exam-prep
+# 2026 年 7 月起 Hugging Face 免費帳號不能建立 Docker Space（API 回 402 Payment Required），
+# 所以不再自動執行；保留給有 Hugging Face PRO 的人手動使用。
 on:
-  push:
-    branches: [main]
-    paths:
-      - "src/**"
-      - "deploy/hf/**"
-      - ".github/workflows/deploy-hf.yml"
   workflow_dispatch:
-  workflow_call:
-    secrets:
-      HF_TOKEN:
-        required: true
 
 concurrency:
   group: deploy-hf
