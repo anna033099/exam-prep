@@ -29,12 +29,16 @@ class FormatError(Exception):
     pass
 
 
+class Unreachable(Exception):
+    pass
+
+
 def fetch(file_id):
     import requests
     last = None
-    for attempt in range(4):
+    for attempt in range(2):
         try:
-            r = requests.get(FILE_URL.format(file_id), timeout=60,
+            r = requests.get(FILE_URL.format(file_id), timeout=40,
                              headers={'User-Agent': 'ExamPrep/1.0 (+study site; monthly update)'})
             r.raise_for_status()
             return r.content
@@ -42,7 +46,7 @@ def fetch(file_id):
             last = e
             print(f'下載 file_id={file_id} 失敗，重試：{e}', flush=True)
             time.sleep(10 * (attempt + 1))
-    raise RuntimeError(f'無法下載 file_id={file_id}：{last}')
+    raise Unreachable(f'連不到考選部網站（file_id={file_id}）：{type(last).__name__}')
 
 
 def decode(raw):
@@ -108,11 +112,14 @@ def classify(name):
     return []
 
 
-def collect(dump=None, min_year=None):
-    """下載並解析官方資料，回傳 {slug: [session dict]}。"""
+def collect(dump=None, min_year=None, local=None):
+    """下載（或從 local 資料夾讀取 moex_<file_id>.csv）並解析官方資料，回傳 {slug: [session dict]}。"""
     out = {}
     for src in SOURCES:
-        raw = fetch(src['file_id'])
+        if local:
+            raw = open(os.path.join(local, f"moex_{src['file_id']}.csv"), 'rb').read()
+        else:
+            raw = fetch(src['file_id'])
         if dump:
             os.makedirs(dump, exist_ok=True)
             open(os.path.join(dump, f"moex_{src['file_id']}.csv"), 'wb').write(raw)
@@ -180,13 +187,14 @@ def merge(data, official):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--dump', help='把下載的原始 CSV 存到這個資料夾')
+    ap.add_argument('--from', dest='local', help='改用這個資料夾裡手動下載的 moex_4484.csv、moex_4509.csv')
     ap.add_argument('--dry-run', action='store_true')
     ap.add_argument('--summary', help='把結果附加到這個 Markdown 檔')
     args = ap.parse_args()
     this_roc = date.today().year - 1911
     lines = ['## 考期（考選部政府資料開放）']
     try:
-        official = collect(args.dump, min_year=this_roc - 1)
+        official = collect(args.dump, min_year=this_roc - 1, local=args.local)
         data = json.load(open(EXAMS, encoding='utf-8'))
         changes = merge(data, official)
         for slug, ss in official.items():
@@ -198,7 +206,12 @@ def main():
                 f.write('\n')
         lines += [f'- {c}' for c in changes] or ['- 沒有變更']
         ok = True
-    except (FormatError, RuntimeError) as e:
+    except Unreachable as e:
+        # 考選部主站（wwwc）目前擋國外連線，GitHub 的主機連不到；不算失敗，考期維持原狀。
+        lines.append(f'- 略過：{e}。考期維持原狀；可用自架執行器（台灣網路）或 --from 手動下載的檔案更新。')
+        print(f'::warning::{e}')
+        ok = True
+    except (FormatError, RuntimeError, OSError) as e:
         lines.append(f'- **失敗，未寫入**：{e}')
         ok = False
     print('\n'.join(lines))
