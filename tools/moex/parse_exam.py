@@ -399,6 +399,13 @@ CN = '一二三四五六七八九十'
 
 
 def cn_num(s):
+    try:
+        return _cn_num(s)
+    except ValueError:
+        return -1   # 不合法的中文數字（例如「二二」），不當題號
+
+
+def _cn_num(s):
     if s == '十':
         return 10
     if s.startswith('十'):

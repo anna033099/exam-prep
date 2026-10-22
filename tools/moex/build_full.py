@@ -60,7 +60,14 @@ def answers_layout(pdf):
 
 
 def process(m):
-    """解析一份試卷，回傳 (paper dict 或 None, 報告列)。"""
+    """解析一份試卷，回傳 (paper dict 或 None, 報告列)。單份試卷出錯不影響其他試卷。"""
+    try:
+        return _process(m)
+    except Exception as e:
+        return None, {'key': [m['exam_code'], m['s']], 'error': f'解析失敗：{type(e).__name__}: {e}'}
+
+
+def _process(m):
     try:
         doc = fitz.open(m['q_pdf'])
         first = doc[0].get_text()

@@ -1,0 +1,65 @@
+name: 發布展示版到 GitHub Pages
+
+# Blazor WebAssembly 展示版：題庫從 SeedData 轉成靜態 JSON，連同網站一起發布到 GitHub Pages。
+# 第一次使用前：repo → Settings → Pages → Build and deployment → Source 選「GitHub Actions」。
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/ExamPrep.Showcase/**"
+      - "src/ExamPrep.Web/SeedData/**"
+      - "tools/showcase/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 建置 Blazor WebAssembly
+        run: dotnet publish src/ExamPrep.Showcase -c Release -o out
+
+      - name: 產生靜態題庫
+        run: python tools/showcase/build_data.py src/ExamPrep.Web/SeedData out/wwwroot/data
+
+      - name: 調整成 GitHub Pages 子路徑
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          sed -i "s|<base href=\"/\" />|<base href=\"/${repo}/\" />|" out/wwwroot/index.html
+          # GitHub Pages 沒有伺服器端路由：找不到的網址回傳 404.html，內容與首頁相同，交給 Blazor 路由處理
+          cp out/wwwroot/index.html out/wwwroot/404.html
+          touch out/wwwroot/.nojekyll
+          du -sh out/wwwroot
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: out/wwwroot
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

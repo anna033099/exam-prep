@@ -1,0 +1,92 @@
+@page "/paper/{File}/{Id}"
+@inject DataService Data
+@inject WrongBook Wrong
+
+<PageTitle>@(paper?.Subject ?? "試卷")｜備考簿</PageTitle>
+
+@if (loading)
+{
+    <p class="muted">載入中…</p>
+}
+else if (paper is null)
+{
+    <p>找不到這份試卷。<a href="">回題庫</a></p>
+}
+else
+{
+    <p class="eyebrow"><a href="">題庫</a> ／ @paper.Year 年</p>
+    <h1>@paper.Subject</h1>
+    <p class="lead">@paper.Year 年 @paper.ExamTitle</p>
+    <div class="sheet meta">
+        @if (paper.Categories.Count > 0) { <div><span class="muted">適用類科</span> @string.Join("、", paper.Categories)</div> }
+        @if (paper.Official > 0) { <div><span class="muted">選擇題</span> 收錄 @paper.Questions.Count／官方 @paper.Official 題</div> }
+        @if (paper.Essays.Count > 0) { <div><span class="muted">申論題</span> @paper.Essays.Count 題（沒有官方答案，不計分）</div> }
+        <div class="links">
+            <span class="muted">原始檔案</span>
+            <a href="@paper.QuestionUrl" target="_blank" rel="noopener">試題 PDF</a>
+            @if (!string.IsNullOrEmpty(paper.AnswerUrl) && paper.AnswerUrl != paper.QuestionUrl) { <a href="@paper.AnswerUrl" target="_blank" rel="noopener">標準答案 PDF</a> }
+        </div>
+        @if (!string.IsNullOrEmpty(paper.Note)) { <div class="small">@paper.Note</div> }
+        @if (!string.IsNullOrEmpty(paper.AnswerNote)) { <div class="small"><strong>答案備註：</strong>@paper.AnswerNote</div> }
+    </div>
+
+    @if (paper.Questions.Count > 0)
+    {
+        <div class="score sheet">
+            已作答 <strong>@answered</strong> / @paper.Questions.Count，答對 <strong>@right</strong>
+            @if (answered > 0) { <span>（@(right * 100 / answered)%）</span> }
+            <span class="muted small">答錯的題目會自動收進錯題本。</span>
+        </div>
+        @foreach (var q in paper.Questions)
+        {
+            <QuestionCard Q="q" OnAnswered="r => Answered(q, r)" />
+        }
+    }
+
+    @if (paper.Essays.Count > 0)
+    {
+        <h2 class="mt">申論題</h2>
+        @foreach (var e in paper.Essays)
+        {
+            <section class="q essay">
+                <div class="q-head"><span class="pill">申論第@(Text.CnNumber(e.No))題・不計分</span></div>
+                <div class="essay-text">@Text.Render(e.Text)</div>
+                @if (!string.IsNullOrEmpty(e.Remark)) { <p class="warn small">⚠ @e.Remark</p> }
+            </section>
+        }
+    }
+
+    @if (paper.Excluded.Count > 0)
+    {
+        <details class="sheet mt">
+            <summary>未收錄的題目（@paper.Excluded.Count 題）</summary>
+            <p class="muted small">以下題目無法以純文字完整還原，為避免錯誤而不收錄，請看原卷 PDF。</p>
+            <ul class="excluded">
+                @foreach (var x in paper.Excluded) { <li><span class="num">@Text.ExcludedLabel(x.No)</span>：@x.Reason</li> }
+            </ul>
+        </details>
+    }
+}
+
+@code {
+    [Parameter] public string File { get; set; } = "";
+    [Parameter] public string Id { get; set; } = "";
+    private Paper? paper;
+    private bool loading = true;
+    private int answered, right;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        paper = await Data.PaperAsync(File, Uri.UnescapeDataString(Id));
+        answered = right = 0;
+        loading = false;
+    }
+
+    private async Task Answered(Question q, (string Pick, bool Correct) r)
+    {
+        answered++;
+        if (r.Correct) right++;
+        await Wrong.RecordAsync(paper!, q, r.Pick, r.Correct);
+    }
+}

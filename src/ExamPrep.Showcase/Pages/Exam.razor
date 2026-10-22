@@ -1,0 +1,62 @@
+@page "/exam/{Slug}"
+@inject DataService Data
+
+<PageTitle>@(exam?.Short ?? "考試")｜備考簿</PageTitle>
+
+@if (exam is null || rows is null)
+{
+    <p class="muted">載入中…</p>
+}
+else
+{
+    <p class="eyebrow"><a href="">題庫</a> ／ @exam.Group</p>
+    <h1>@exam.Short</h1>
+    <p class="lead">@exam.Name。@Text.Years(exam.First, exam.Last)，@exam.Papers.ToString("N0") 份試卷，選擇題 @exam.Choice.ToString("N0") 題、申論題 @exam.Essay.ToString("N0") 題。</p>
+
+    <div class="filters">
+        <select @bind="year" aria-label="年度">
+            <option value="0">全部年度</option>
+            @foreach (var y in rows.Select(r => r.Year).Distinct().OrderByDescending(y => y))
+            {
+                <option value="@y">@y 年</option>
+            }
+        </select>
+        <input type="search" placeholder="科目或類科，例如：行政法、資訊處理" @bind="q" @bind:event="oninput" aria-label="科目或類科" />
+    </div>
+    <p class="muted small">共 @Filtered.Count().ToString("N0") 份</p>
+
+    <div class="paper-list">
+        <Virtualize Items="Filtered.ToList()" Context="r" ItemSize="74">
+            <a class="paper-row" href="paper/@r.File/@Uri.EscapeDataString(r.Id)">
+                <div class="yr">@r.Year<small>年</small></div>
+                <div>
+                    <div class="name">@r.Subject</div>
+                    <div class="muted small">@r.ExamTitle@(r.Categories.Count > 0 ? "｜" + string.Join("、", r.Categories.Take(2)) : "")</div>
+                </div>
+                <div class="muted small nowrap">
+                    @if (r.Official > 0) { <span>選擇 @r.Choice/@r.Official</span> }
+                    @if (r.Essay > 0) { <span> 申論 @r.Essay</span> }
+                    @if (r.Official == 0 && r.Essay == 0 && r.Choice == 0) { <span>原卷連結</span> }
+                </div>
+            </a>
+        </Virtualize>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+    private ExamInfo? exam;
+    private List<PaperRow>? rows;
+    private int year;
+    private string q = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        exam = (await Data.CatalogAsync()).Exams.FirstOrDefault(e => e.Slug == Slug);
+        rows = exam is null ? new() : await Data.PapersAsync(Slug);
+    }
+
+    private IEnumerable<PaperRow> Filtered => (rows ?? new())
+        .Where(r => year == 0 || r.Year == year)
+        .Where(r => string.IsNullOrWhiteSpace(q) || r.Subject.Contains(q.Trim()) || r.Categories.Any(c => c.Contains(q.Trim())));
+}

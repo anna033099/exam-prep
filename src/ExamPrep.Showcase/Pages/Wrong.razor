@@ -1,0 +1,59 @@
+@page "/wrong"
+@inject WrongBook Book
+
+<PageTitle>錯題本｜備考簿</PageTitle>
+
+<h1>錯題本</h1>
+<p class="lead">答錯的題目會存在這台電腦的瀏覽器裡（不會上傳）。同一題連續答對 2 次就從這裡移除。</p>
+
+@if (items is null)
+{
+    <p class="muted">載入中…</p>
+}
+else if (items.Count == 0)
+{
+    <div class="sheet">目前沒有錯題。到 <a href="">題庫</a> 選一份試卷開始作答吧。</div>
+}
+else
+{
+    <div class="filters">
+        <span class="muted">共 @items.Count 題</span>
+        <button class="btn btn-line btn-sm" @onclick="Reload">重新出題</button>
+        <button class="btn btn-line btn-sm" @onclick="Clear">清空錯題本</button>
+    </div>
+    @foreach (var w in snapshot)
+    {
+        <QuestionCard @key="(w.PaperId, w.Question.No, round)" Q="w.Question" Source="@($"{w.PaperTitle} 第 {w.Question.No} 題")"
+                      OnAnswered="r => Answered(w, r)" />
+    }
+}
+
+@code {
+    private List<WrongItem>? items;
+    private List<WrongItem> snapshot = new();
+    private int round;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await Book.AllAsync();
+        snapshot = items.ToList();
+    }
+
+    private async Task Answered(WrongItem w, (string Pick, bool Correct) r)
+    {
+        var paper = new Paper { Id = w.PaperId, Subject = w.PaperTitle, QuestionUrl = w.QuestionUrl };
+        await Book.RecordAsync(paper, w.Question, r.Pick, r.Correct);
+    }
+
+    private void Reload()
+    {
+        snapshot = items!.ToList();
+        round++;
+    }
+
+    private async Task Clear()
+    {
+        await Book.ClearAsync();
+        snapshot.Clear();
+    }
+}

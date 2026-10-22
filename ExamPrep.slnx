@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/ExamPrep.Showcase/ExamPrep.Showcase.csproj" />
     <Project Path="src/ExamPrep.Web/ExamPrep.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">

@@ -1,0 +1,49 @@
+@page "/"
+@inject DataService Data
+
+<PageTitle>備考簿｜國家考試考古題</PageTitle>
+
+<section class="hero">
+    <h1>公職考古題，一題一題刷到會。</h1>
+    <p class="lead">考選部 @(catalog?.Exams.Count ?? 0) 類國家考試的歷屆試題：選擇題附官方標準答案，點選項就能對答；申論題可以閱讀原題。</p>
+    @if (catalog is not null)
+    {
+        <div class="facts">
+            <div><strong>@catalog.Totals.Choice.ToString("N0")</strong> 題選擇題</div>
+            <div><strong>@catalog.Totals.Essay.ToString("N0")</strong> 題申論題</div>
+            <div><strong>@catalog.Totals.Papers.ToString("N0")</strong> 份試卷</div>
+        </div>
+        <input class="search" type="search" placeholder="找考試，例如：高普考、警察、地政士" @bind="q" @bind:event="oninput" aria-label="找考試" />
+    }
+</section>
+
+@if (catalog is null)
+{
+    <p class="muted">載入中…</p>
+}
+else
+{
+    @foreach (var g in catalog.Exams.Where(Match).GroupBy(e => e.Group))
+    {
+        <h2 class="group-title">@g.Key</h2>
+        <div class="exam-grid">
+            @foreach (var e in g)
+            {
+                <a class="exam-card" href="exam/@e.Slug">
+                    <h3>@e.Short</h3>
+                    <div class="count">@((e.Choice + e.Essay).ToString("N0")) <small>題</small></div>
+                    <div class="muted small">@Text.Years(e.First, e.Last)・@e.Papers.ToString("N0") 份試卷</div>
+                </a>
+            }
+        </div>
+    }
+}
+
+@code {
+    private Catalog? catalog;
+    private string q = "";
+
+    protected override async Task OnInitializedAsync() => catalog = await Data.CatalogAsync();
+
+    private bool Match(ExamInfo e) => string.IsNullOrWhiteSpace(q) || e.Short.Contains(q.Trim()) || e.Name.Contains(q.Trim()) || e.Group.Contains(q.Trim());
+}

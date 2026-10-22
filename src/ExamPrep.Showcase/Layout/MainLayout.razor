@@ -1,0 +1,30 @@
+@inherits LayoutComponentBase
+
+<header class="site-header">
+    <div class="wrap bar">
+        <a class="brand" href="">
+            <span class="brand-mark" aria-hidden="true"><i class="on"></i><i></i><i></i><i class="on"></i></span>
+            <span class="brand-text">備考簿</span>
+            <span class="pill">展示版</span>
+        </a>
+        <nav class="nav">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">題庫</NavLink>
+            <NavLink class="nav-link" href="wrong">錯題本</NavLink>
+            <NavLink class="nav-link" href="about">關於</NavLink>
+            <a class="nav-link" href="https://github.com/anna033099/exam-prep" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+    </div>
+</header>
+<div class="notice">
+    <div class="wrap">
+        這是放在 GitHub Pages 的靜態展示版，題目在瀏覽器裡作答、錯題只存在這台電腦。
+        登入、間隔複習、計時模擬考、討論區與 AI 詳解是完整版（ASP.NET Core MVC＋SQL Server）的功能，
+        <a href="about">說明與原始碼</a>。
+    </div>
+</div>
+<main class="wrap main">
+    @Body
+</main>
+<footer class="site-footer">
+    <div class="wrap">試題取自考選部考畢試題查詢平臺公開之試題與標準答案，每份試卷附原卷 PDF 連結。本站為個人作品，與考選部無關。</div>
+</footer>

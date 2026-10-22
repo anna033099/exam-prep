@@ -1,0 +1,69 @@
+@using ExamPrep.Showcase.Services
+
+<section class="q @(Done ? (Correct ? "is-right" : "is-wrong") : "")">
+    @if (!string.IsNullOrEmpty(Q.Passage))
+    {
+        <div class="q-passage">@Text.Render(Q.Passage)</div>
+    }
+    <div class="q-head">
+        <span class="q-no">@Q.No.</span>
+        <div class="q-stem">
+            @if (Q.Multi) { <span class="pill pill-amber">複選</span> }
+            @if (string.IsNullOrEmpty(Q.Stem)) { <span class="muted">（依上方文章作答）</span> } else { @Text.Render(Q.Stem) }
+        </div>
+    </div>
+    <ul class="opts">
+        @for (var i = 0; i < Q.Options.Count; i++)
+        {
+            var letter = (char)('A' + i);
+            var cls = !Done ? (picked.Contains(letter) ? "picked" : "")
+                    : Q.Answer.Contains(letter) ? "is-answer" : picked.Contains(letter) ? "is-wrong" : "";
+            <li>
+                <button type="button" class="opt @cls" disabled="@Done" @onclick="() => Pick(letter)">
+                    <span class="letter">@letter</span><span>@Text.Render(Q.Options[i])</span>
+                </button>
+            </li>
+        }
+    </ul>
+    <div class="q-foot">
+        @if (Q.Multi && !Done)
+        {
+            <button type="button" class="btn btn-ink btn-sm" disabled="@(picked.Count == 0)" @onclick="Submit">確認答案</button>
+        }
+        @if (Done)
+        {
+            <strong class="@(Correct ? "ok" : "bad")">@(Correct ? "答對了" : $"答錯，正解 {Q.Answer}")</strong>
+        }
+        @if (!string.IsNullOrEmpty(Source)) { <span class="muted">@Source</span> }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Question Q { get; set; } = default!;
+    [Parameter] public string? Source { get; set; }
+    [Parameter] public EventCallback<(string Pick, bool Correct)> OnAnswered { get; set; }
+
+    private readonly SortedSet<char> picked = new();
+    private bool Done;
+    private bool Correct;
+
+    private async Task Pick(char letter)
+    {
+        if (Done) return;
+        if (Q.Multi)
+        {
+            if (!picked.Remove(letter)) picked.Add(letter);
+            return;
+        }
+        picked.Add(letter);
+        await Submit();
+    }
+
+    private async Task Submit()
+    {
+        var pick = string.Concat(picked);
+        Done = true;
+        Correct = pick == Q.Answer;
+        await OnAnswered.InvokeAsync((pick, Correct));
+    }
+}

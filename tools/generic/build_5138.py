@@ -13,6 +13,8 @@ import collections, gzip, json, os, re, subprocess, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from parse_text_mc import parse, parse_essays
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tabf'))
+from parse_tabf import build as tabf_build
 from textnorm import canon
 import pymupdf as fitz
 
@@ -47,6 +49,12 @@ def answers_layout(pdf):
     for m in re.finditer(r'[\[【]\s*([A-E])\s*[\]】]\s*(\d{1,3})\s*[.．]', t):
         out.setdefault(int(m.group(2)), m.group(1))
     return out
+
+
+def answers_tabf(pdf):
+    """第二種讀法（台灣金融研訓院代辦的試卷：題號前「【3】12.」）。"""
+    txt = subprocess.run(['pdftotext', pdf, '-'], capture_output=True, text=True).stdout
+    return {int(n): 'ABCD'[int(a) - 1] for a, n in re.findall(r'【(?:改\s*)?([1-4])】\s*(\d+)\s*[\.．]', txt)}
 
 
 def head_ok(pdf, pat):
@@ -104,6 +112,23 @@ def main():
                 for q in r['questions']:
                     parts = [q['stem'], *q['options'].values(), q['passage'] or '']
                     if not all(norm(x) in full for x in parts if x):
+                        excluded.append({'no': q['no'], 'reason': '含特殊排版，文字與原卷比對不一致'})
+                    elif ans2.get(q['no']) != q['answer']:
+                        excluded.append({'no': q['no'], 'reason': '標準答案以兩種方法讀取結果不一致，為避免錯誤不收錄'})
+                    else:
+                        questions.append(q)
+            if not af and qf:
+                # 台糖、菸酒、郵局、農田水利由台灣金融研訓院代辦：答案標在題號前（【3】12.），選項記號是圖形
+                qpdf = os.path.join(base, qf['file'])
+                fullq = poppler(qpdf)
+                r = tabf_build(qpdf)
+                ans2 = answers_tabf(qpdf)
+                total = r['total']
+                excluded = list(r['excluded'])
+                for q in r['questions']:
+                    q.pop('corrected', None)
+                    parts = [q['stem'], *q['options'].values(), q['passage'] or '']
+                    if not all(norm(x) in fullq for x in parts if x):
                         excluded.append({'no': q['no'], 'reason': '含特殊排版，文字與原卷比對不一致'})
                     elif ans2.get(q['no']) != q['answer']:
                         excluded.append({'no': q['no'], 'reason': '標準答案以兩種方法讀取結果不一致，為避免錯誤不收錄'})
