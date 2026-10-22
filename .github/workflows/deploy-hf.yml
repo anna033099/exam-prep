@@ -33,16 +33,20 @@ jobs:
           ref: main
 
       - name: 檢查設定
+        id: cfg
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_SPACE: ${{ vars.HF_SPACE }}
         run: |
           if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
-            echo "::error::請先在 GitHub 設定 Secret HF_TOKEN 與 Variable HF_SPACE（例如 anna033099/exam-prep）"
-            exit 1
+            echo "::warning::尚未設定 Secret HF_TOKEN 或 Variable HF_SPACE，這次略過部署（設定方式見 DEPLOY.md）"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: 組出 Space 內容
+        if: steps.cfg.outputs.ready == 'true'
         run: |
           mkdir -p hfdeploy
           cp -r src hfdeploy/src
@@ -54,6 +58,7 @@ jobs:
           find hfdeploy -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
 
       - name: 上傳到 Space
+        if: steps.cfg.outputs.ready == 'true'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_SPACE: ${{ vars.HF_SPACE }}
