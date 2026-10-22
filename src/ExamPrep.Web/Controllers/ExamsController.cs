@@ -7,14 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPrep.Web.Controllers;
 
-public class ExamsController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown) : Controller
+public class ExamsController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown, CatalogCache catalog) : Controller
 {
     public async Task<IActionResult> Index()
     {
         var exams = await db.Exams.Include(e => e.Sessions).OrderBy(e => e.SortOrder).AsNoTracking().ToListAsync();
-        ViewBag.PaperCounts = await db.Papers.Where(p => p.ExamId != null)
-            .GroupBy(p => p.ExamId!.Value).Select(g => new { g.Key, Count = g.Count() })
-            .ToDictionaryAsync(x => x.Key, x => x.Count);
+        ViewBag.PaperCounts = (await catalog.ExamStatsAsync()).ToDictionary(x => x.Key, x => x.Value.Papers);
         return View(exams);
     }
 
@@ -28,10 +26,11 @@ public class ExamsController(AppDbContext db, UserManager<ApplicationUser> users
         var targets = userId is null ? new HashSet<int>()
             : (await db.UserTargetExams.Where(t => t.UserId == userId).Select(t => t.ExamSessionId).ToListAsync()).ToHashSet();
         ViewBag.Sessions = exam.Sessions.OrderByDescending(s => s.ExamStart).Select(s => countdown.ToItem(s, targets.Contains(s.Id))).ToList();
-        ViewBag.Papers = await db.Papers.Where(p => p.ExamId == exam.Id)
-            .OrderByDescending(p => p.RocYear).ThenBy(p => p.SubjectName)
-            .Select(p => new ViewModels.PaperRow { Id = p.Id, RocYear = p.RocYear, SubjectName = p.SubjectName, QuestionCount = p.Questions.Count, OfficialCount = p.OfficialQuestionCount })
+        ViewBag.Papers = await db.Papers.Where(p => p.ExamLinks.Any(l => l.ExamId == exam.Id))
+            .OrderByDescending(p => p.RocYear).ThenBy(p => p.SubjectName).Take(12)
+            .Select(p => new ViewModels.PaperRow { Id = p.Id, RocYear = p.RocYear, SubjectName = p.SubjectName, QuestionCount = p.Questions.Count(q => q.Type != QuestionType.Essay), EssayCount = p.Questions.Count(q => q.Type == QuestionType.Essay), OfficialCount = p.OfficialQuestionCount })
             .ToListAsync();
+        ViewBag.PaperTotal = (await catalog.ExamStatsAsync()).TryGetValue(exam.Id, out var st) ? st.Papers : 0;
         return View(exam);
     }
 }

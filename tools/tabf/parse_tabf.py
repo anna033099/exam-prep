@@ -3,7 +3,9 @@
 與考選部解析器相同原則：只輸出能完整還原的四選一題目；含表格、圖片、上下標、
 特殊符號或選項數不符者一律排除並記錄原因。
 """
-import re, sys, json
+import re, sys, json, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from textnorm import canon
 import pymupdf as fitz
 
 MARKS = {'\x81': 'A', '\x82': 'B', '\x83': 'C', '\x84': 'D',
@@ -206,6 +208,7 @@ def parse(pdf):
 
 
 def clean(s):
+    s = canon(s)
     s = re.sub(r'\[u\]\s*\[/u\]', '＿＿＿', s or '')
     s = re.sub(r'\s+', ' ', s).strip()
     return re.sub(r'(?<=[\u2e80-\u9fff\u3000-\u303f\uff00-\uffef])\s+(?=[\u2e80-\u9fff\u3000-\u303f\uff00-\uffef])', '', s)

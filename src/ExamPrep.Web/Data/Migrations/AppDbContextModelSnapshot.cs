@@ -143,6 +143,11 @@ namespace ExamPrep.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Group")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -286,6 +291,21 @@ namespace ExamPrep.Web.Data.Migrations
                     b.ToTable("ExamSubjects");
                 });
 
+            modelBuilder.Entity("ExamPrep.Web.Models.PaperExamLink", b =>
+                {
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaperId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ExamId", "PaperId");
+
+                    b.HasIndex("PaperId");
+
+                    b.ToTable("PaperExamLinks");
+                });
+
             modelBuilder.Entity("ExamPrep.Web.Models.PracticeAnswer", b =>
                 {
                     b.Property<int>("Id")
@@ -416,6 +436,10 @@ namespace ExamPrep.Web.Data.Migrations
                     b.Property<string>("Passage")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Remark")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("Stem")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -424,6 +448,8 @@ namespace ExamPrep.Web.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Type");
 
                     b.HasIndex("PaperId", "Number")
                         .IsUnique();
@@ -646,6 +672,8 @@ namespace ExamPrep.Web.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExamId");
+
+                    b.HasIndex("RocYear");
 
                     b.HasIndex("SubjectName");
 
@@ -1005,6 +1033,25 @@ namespace ExamPrep.Web.Data.Migrations
                     b.Navigation("Exam");
                 });
 
+            modelBuilder.Entity("ExamPrep.Web.Models.PaperExamLink", b =>
+                {
+                    b.HasOne("ExamPrep.Web.Models.Exam", "Exam")
+                        .WithMany()
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ExamPrep.Web.Models.QuestionPaper", "Paper")
+                        .WithMany("ExamLinks")
+                        .HasForeignKey("PaperId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Paper");
+                });
+
             modelBuilder.Entity("ExamPrep.Web.Models.PracticeAnswer", b =>
                 {
                     b.HasOne("ExamPrep.Web.Models.Question", "Question")
@@ -1195,6 +1242,8 @@ namespace ExamPrep.Web.Data.Migrations
 
             modelBuilder.Entity("ExamPrep.Web.Models.QuestionPaper", b =>
                 {
+                    b.Navigation("ExamLinks");
+
                     b.Navigation("Questions");
                 });
 

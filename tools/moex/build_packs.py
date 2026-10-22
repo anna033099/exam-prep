@@ -1,11 +1,12 @@
 """把下載的官方 PDF 批次解析成網站 SeedData/papers/*.json，並輸出品質報告。"""
 import json, re, sys, os, collections
 sys.path.insert(0, os.path.dirname(__file__))
-from parse_exam import build
+from parse_exam import build, canon
 import pymupdf as fitz
 
 TITLES = {'010': '公務人員初等考試', '080': '公務人員高等考試三級考試暨普通考試', '190': '特種考試地方政府公務人員考試、離島地區公務人員考試', '200': '特種考試地方政府公務人員考試'}
 def norm(s):
+    s = canon(s)
     s = s.replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s\ue000-\uf8ff]', '', s)
 

@@ -19,7 +19,7 @@
             </div>
         </div>
         <p class="my-2" style="white-space:pre-wrap">@c.Body</p>
-        <p class="small mb-2"><a asp-controller="Question" asp-action="Detail" asp-route-id="@c.QuestionId">@c.Question!.Paper!.RocYear 年 @c.Question.Paper.SubjectName 第 @c.Question.Number 題</a></p>
+        <p class="small mb-2"><a asp-controller="Question" asp-action="Detail" asp-route-id="@c.QuestionId">@c.Question!.Paper!.RocYear 年 @c.Question.Paper.SubjectName @c.Question.Label</a></p>
         <form asp-action="ModerateComment" asp-route-id="@c.Id" method="post" class="d-flex gap-2">
             @if (!c.IsHidden) { <button class="btn btn-sm btn-line" name="action" value="hide">隱藏</button> }
             <button class="btn btn-sm btn-line" name="action" value="restore">恢復顯示</button>

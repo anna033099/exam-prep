@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ExamPrep.Web.Controllers;
 
-public class HomeController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown, TaipeiDate date, StatsService stats) : Controller
+public class HomeController(AppDbContext db, UserManager<ApplicationUser> users, CountdownService countdown, TaipeiDate date, StatsService stats, CatalogCache catalog) : Controller
 {
     public async Task<IActionResult> Index()
     {
@@ -17,24 +17,21 @@ public class HomeController(AppDbContext db, UserManager<ApplicationUser> users,
         if (userId is null)
         {
             var all = await countdown.AllAsync(null);
-            var exams = await db.Exams.OrderBy(e => e.SortOrder).AsNoTracking().ToListAsync();
-            var stats = await db.Papers.Where(p => p.ExamId != null)
-                .GroupBy(p => p.ExamId!.Value)
-                .Select(g => new { g.Key, Papers = g.Count(), Questions = g.Sum(p => p.Questions.Count), First = g.Min(p => p.RocYear), Last = g.Max(p => p.RocYear) })
-                .ToDictionaryAsync(x => x.Key);
-            // 首頁示範題：隨機挑一題題幹短、無題組文章的單選題
-            var candidates = db.Questions.Where(q => q.Type == QuestionType.Single && q.Passage == null && q.Stem.Length < 70
-                                                      && q.OptionA.Length < 30 && q.OptionB.Length < 30 && q.OptionC.Length < 30 && q.OptionD.Length < 30);
-            var n = await candidates.CountAsync();
-            var sample = n == 0 ? null : await candidates.Include(q => q.Paper).OrderBy(q => q.Id).Skip(Random.Shared.Next(n)).FirstOrDefaultAsync();
+            var exams = await catalog.ExamsAsync();
+            var examStats = await catalog.ExamStatsAsync();
+            // 首頁示範題：從快取的候選題目中隨機挑一題
+            var ids = await catalog.SampleQuestionIdsAsync();
+            var sample = ids.Count == 0 ? null : await db.Questions.Include(q => q.Paper).AsNoTracking().FirstOrDefaultAsync(q => q.Id == ids[Random.Shared.Next(ids.Count)]);
+            var (choice, essay) = await catalog.AllQuestionCountsAsync();
             return View("Landing", new LandingVm
             {
-                ExamStats = exams.Select(e => stats.TryGetValue(e.Id, out var x)
-                    ? new ExamStat(e, x.Papers, x.Questions, x.First, x.Last) : new ExamStat(e, 0, 0, 0, 0)).ToList(),
+                ExamStats = exams.Select(e => examStats.TryGetValue(e.Id, out var x)
+                    ? new ExamStat(e, x.Papers, x.Choice, x.First, x.Last, x.Essay) : new ExamStat(e, 0, 0, 0, 0)).ToList(),
                 Sample = sample,
-                PaperCount = await db.Papers.CountAsync(),
-                QuestionCount = await db.Questions.CountAsync(),
-                ExamCount = await db.Exams.CountAsync(),
+                PaperCount = await catalog.AllPaperCountAsync(),
+                QuestionCount = choice,
+                EssayCount = essay,
+                ExamCount = exams.Count,
                 Upcoming = all.Where(i => !countdown.IsPast(i.Session)).Take(4).ToList()
             });
         }

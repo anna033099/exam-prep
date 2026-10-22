@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace ExamPrep.Web.Controllers;
 
 [Authorize]
-public class PracticeController(AppDbContext db, UserManager<ApplicationUser> users, PracticeService practice) : Controller
+public class PracticeController(AppDbContext db, UserManager<ApplicationUser> users, PracticeService practice, CatalogCache catalog) : Controller
 {
     private string UserId => users.GetUserId(User)!;
 
@@ -19,7 +19,7 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
     public async Task<IActionResult> Index(string? exam, int? year, string? q, int page = 1)
     {
         var papers = db.Papers.AsNoTracking();
-        if (!string.IsNullOrEmpty(exam)) papers = papers.Where(p => p.Exam!.Slug == exam);
+        if (!string.IsNullOrEmpty(exam)) papers = papers.Where(p => p.ExamLinks.Any(l => l.Exam!.Slug == exam));
         if (year is not null) papers = papers.Where(p => p.RocYear == year);
         if (!string.IsNullOrWhiteSpace(q)) papers = papers.Where(p => p.SubjectName.Contains(q) || p.Categories.Contains(q));
 
@@ -32,7 +32,7 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
             .Select(p => new PaperRow
             {
                 Id = p.Id, RocYear = p.RocYear, ExamTitle = p.ExamTitle, SubjectName = p.SubjectName,
-                Categories = p.Categories, PaperCode = p.PaperCode, QuestionCount = p.Questions.Count,
+                Categories = p.Categories, PaperCode = p.PaperCode, QuestionCount = p.Questions.Count(q => q.Type != QuestionType.Essay), EssayCount = p.Questions.Count(q => q.Type == QuestionType.Essay),
                 OfficialCount = p.OfficialQuestionCount, ExamSlug = p.Exam != null ? p.Exam.Slug : null,
                 Withheld = p.ContentWithheld
             }).ToListAsync();
@@ -50,18 +50,17 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
                 if (bestMap.TryGetValue(r.Id, out var pct)) r.BestScore = pct;
         }
 
-        var subjects = await db.Questions.GroupBy(x => x.Paper!.SubjectName)
-            .Select(g => new { g.Key, Count = g.Count() }).OrderByDescending(x => x.Count).ToListAsync();
+        var subjects = await catalog.SubjectCountsAsync(exam);
 
         return View(new PracticeIndexVm
         {
             Exam = exam, Year = year, Q = q, Page = page, PageCount = pages, Total = total,
-            ExamPaperCounts = await db.Papers.Where(p => p.Exam != null).GroupBy(p => p.Exam!.Slug).Select(g => new { g.Key, C = g.Count() }).ToDictionaryAsync(x => x.Key, x => x.C),
-            AllPaperCount = await db.Papers.CountAsync(),
-            Exams = await db.Exams.OrderBy(e => e.SortOrder).ToListAsync(),
-            Years = await db.Papers.Select(p => p.RocYear).Distinct().OrderByDescending(y => y).ToListAsync(),
+            ExamPaperCounts = await catalog.ExamPaperCountsAsync(),
+            AllPaperCount = await catalog.AllPaperCountAsync(),
+            Exams = await catalog.ExamsAsync(),
+            Years = await catalog.YearsAsync(),
             Papers = rows,
-            Subjects = subjects.Select(s => (s.Key, s.Count)).ToList()
+            Subjects = subjects
         });
     }
 
@@ -95,15 +94,12 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
     /// <summary>自訂範圍出題頁。</summary>
     public async Task<IActionResult> Custom(string? exam)
     {
-        var subjects = db.Questions.Where(q => !q.Paper!.ContentWithheld);
-        if (!string.IsNullOrEmpty(exam)) subjects = subjects.Where(q => q.Paper!.Exam!.Slug == exam);
         return View(new CustomVm
         {
             Exam = exam,
-            Exams = await db.Exams.OrderBy(e => e.SortOrder).ToListAsync(),
-            Years = await db.Papers.Where(p => !p.ContentWithheld).Select(p => p.RocYear).Distinct().OrderBy(y => y).ToListAsync(),
-            Subjects = (await subjects.GroupBy(q => q.Paper!.SubjectName).Select(g => new { g.Key, C = g.Count() })
-                .OrderByDescending(x => x.C).ToListAsync()).Select(x => (x.Key, x.C)).ToList()
+            Exams = await catalog.ExamsAsync(),
+            Years = (await catalog.YearsAsync()).Order().ToList(),
+            Subjects = await catalog.SubjectCountsAsync(exam)
         });
     }
 
@@ -226,7 +222,9 @@ public class PracticeController(AppDbContext db, UserManager<ApplicationUser> us
         if (p is null) return NotFound();
         ViewBag.Excluded = JsonSerializer.Deserialize<List<SeedDataService.ExcludedSeed>>(p.ExcludedJson,
             new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
-        ViewBag.Count = await db.Questions.CountAsync(q => q.PaperId == id);
+        ViewBag.Count = await db.Questions.CountAsync(q => q.PaperId == id && q.Type != QuestionType.Essay);
+        ViewBag.Essays = p.ContentWithheld ? new List<Question>()
+            : await db.Questions.AsNoTracking().Where(q => q.PaperId == id && q.Type == QuestionType.Essay).OrderBy(q => q.Number).ToListAsync();
         ViewBag.ZipCount = p.ContentWithheld ? 0 : await db.Papers.CountAsync(x => x.SubjectName == p.SubjectName && x.ExamId == p.ExamId
                                                                                  && !x.ContentWithheld && x.SourceQuestionUrl.StartsWith("https://wwwq.moex.gov.tw/"));
         return View(p);

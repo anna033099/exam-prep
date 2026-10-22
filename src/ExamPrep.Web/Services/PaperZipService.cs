@@ -19,7 +19,7 @@ public class PaperZipService(AppDbContext db, HttpClient http, ILogger<PaperZipS
     public async Task<List<Item>> ListAsync(string subject, string? examSlug)
     {
         var q = db.Papers.Where(p => p.SubjectName == subject && !p.ContentWithheld && p.SourceQuestionUrl.StartsWith("https://wwwq.moex.gov.tw/"));
-        if (!string.IsNullOrEmpty(examSlug)) q = q.Where(p => p.Exam!.Slug == examSlug);
+        if (!string.IsNullOrEmpty(examSlug)) q = q.Where(p => p.ExamLinks.Any(l => l.Exam!.Slug == examSlug));
         var rows = await q.OrderByDescending(p => p.RocYear).ThenBy(p => p.PaperCode)
             .Select(p => new Item(p.RocYear, p.SubjectName, p.PaperCode, p.SourceQuestionUrl, p.SourceAnswerUrl))
             .Take(MaxPapers).ToListAsync();

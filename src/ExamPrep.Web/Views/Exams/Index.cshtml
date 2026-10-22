@@ -4,11 +4,11 @@
     var counts = (Dictionary<int, int>)ViewBag.PaperCounts;
 }
 <h1>考試資訊</h1>
-<p class="lead-muted">各考試的性質、應試科目與考期。國家考試由考選部辦理；郵局與中華電信為公司自辦甄試，報考資格與錄取方式不同。</p>
+<p class="lead-muted">各考試的性質、應試科目與考期。國家考試由考選部辦理；國營事業、證照與其他招考由各機關或公司自辦，報考資格與錄取方式不同。</p>
 
-@foreach (var group in Model.GroupBy(e => e.OrganizerType))
+@foreach (var group in Model.GroupBy(e => e.Group))
 {
-    <h2 class="mt-4">@(group.Key == OrganizerType.NationalExam ? "國家考試" : "國營／公營事業招考")</h2>
+    <h2 class="mt-4">@(string.IsNullOrEmpty(group.Key) ? "其他" : group.Key)</h2>
     <div class="feature-grid">
         @foreach (var e in group)
         {
@@ -20,7 +20,7 @@
                 </div>
                 <p class="small text-muted mb-2">@e.Name</p>
                 <p class="small mb-2">@e.Summary</p>
-                <span class="small text-muted">@(papers > 0 ? $"題庫 {papers} 份試卷" : "題庫可由 CSV 匯入")・考期 @e.Sessions.Count 筆</span>
+                <span class="small text-muted">@(papers > 0 ? $"題庫 {papers:N0} 份試卷" : "尚無公開試題")@(e.Sessions.Count > 0 ? $"・考期 {e.Sessions.Count} 筆" : "")</span>
             </a>
         }
     </div>

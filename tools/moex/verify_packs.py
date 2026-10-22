@@ -1,9 +1,13 @@
 """獨立驗證：(1) 每題題幹與選項文字是否逐字出現在原始 PDF；(2) 答案是否與以另一種方法讀出的答案表一致。"""
 import json, re, glob, subprocess, collections, sys
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+from textnorm import canon
 import pymupdf as fitz
 
 man = {(m['exam_code'], m['q_url'].replace('https://wwwq.moex.gov.tw/exam/', '')): m for m in json.load(open('manifest.json', encoding='utf-8'))}
 def norm(s):
+    s = canon(s or '')
     s = s.replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s-]', '', s)
 

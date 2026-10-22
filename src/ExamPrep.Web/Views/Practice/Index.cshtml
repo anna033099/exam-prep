@@ -9,7 +9,7 @@
 <div class="list-head">
     <div>
         <h1 class="mb-1">題庫練習</h1>
-        <p class="lead-muted mb-0">初等、高普考、地方特考 101–115 年，郵局 111–114 年，中華電信 101–103 年的歷屆選擇題。</p>
+        <p class="lead-muted mb-0">國家考試、國營事業、證照與升學考試的歷屆試題。選擇題可以作答計分；申論題可以閱讀、寫筆記與討論。每份試卷都附原始來源。</p>
     </div>
     @if (signedIn)
     {
@@ -25,9 +25,16 @@
     <aside class="side" aria-label="篩選">
         <h2>考試</h2>
         <a class="cat @(Model.Exam is null ? "on" : "")" asp-action="Index" asp-route-year="@Model.Year" asp-route-q="@Model.Q">全部 <small>@Model.AllPaperCount</small></a>
-        @foreach (var e in Model.Exams)
+        @foreach (var g in Model.Exams.GroupBy(e => e.Group))
         {
-            <a class="cat @(Model.Exam == e.Slug ? "on" : "")" asp-action="Index" asp-route-exam="@e.Slug" asp-route-year="@Model.Year" asp-route-q="@Model.Q">@e.ShortName <small>@Model.ExamPaperCounts.GetValueOrDefault(e.Slug)</small></a>
+            var open = Model.Exam is null ? g.Key == Model.Exams.First().Group : g.Any(e => e.Slug == Model.Exam);
+            <details class="cat-group" open="@open">
+                <summary>@(string.IsNullOrEmpty(g.Key) ? "其他" : g.Key)</summary>
+                @foreach (var e in g)
+                {
+                    <a class="cat @(Model.Exam == e.Slug ? "on" : "")" asp-action="Index" asp-route-exam="@e.Slug" asp-route-year="@Model.Year" asp-route-q="@Model.Q">@e.ShortName <small>@Model.ExamPaperCounts.GetValueOrDefault(e.Slug)</small></a>
+                }
+            </details>
         }
         <hr />
         <h2>年度</h2>
@@ -45,7 +52,7 @@
             <form asp-action="StartRandom" method="post">
                 <label class="form-label visually-hidden" for="subject">科目</label>
                 <select class="form-select mb-2" id="subject" name="subject" required>
-                    @foreach (var (s, n) in Model.Subjects)
+                    @foreach (var (s, n) in Model.Exam is null ? Model.Subjects.Take(300) : Model.Subjects)
                     {
                         <option value="@s">@s（@n 題）</option>
                     }
@@ -115,12 +122,16 @@
                             }
                             else
                             {
-                                <div class="sub">收錄 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</div>
+                                <div class="sub">
+                                    @if (p.OfficialCount > 0) { <text>選擇題 <span class="num">@p.QuestionCount</span> / <span class="num">@p.OfficialCount</span> 題</text> }
+                                    @if (p.OfficialCount > 0 && p.EssayCount > 0) { <text>・</text> }
+                                    @if (p.EssayCount > 0) { <text>申論題 <span class="num">@p.EssayCount</span> 題</text> }
+                                </div>
                             }
                         </div>
                         <div class="act">
                             @if (p.BestScore is { } b) { <span class="pill @(b >= 60 ? "pill-green" : "pill-wrong")">最佳 @b%</span> }
-                            @if (signedIn && !p.Withheld)
+                            @if (signedIn && !p.Withheld && p.QuestionCount > 0)
                             {
                                 <form asp-action="StartPaper" method="post">
                                     <input type="hidden" name="paperId" value="@p.Id" />

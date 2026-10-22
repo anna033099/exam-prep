@@ -66,6 +66,8 @@ builder.Services.AddAntiforgery(o =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<TaipeiDate>();
 builder.Services.AddScoped<PracticeService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<CatalogCache>();
 builder.Services.AddScoped<CountdownService>();
 builder.Services.AddScoped<SeedDataService>();
 builder.Services.AddScoped<QuestionCsvImporter>();

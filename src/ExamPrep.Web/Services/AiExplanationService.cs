@@ -51,7 +51,7 @@ public class AiExplanationService(AppDbContext db, HttpClient http, IOptions<AiO
 
         try
         {
-            var text = await CallAsync(BuildPrompt(q), ct);
+            var text = await CallAsync(SystemPromptFor(q), BuildPrompt(q), ct);
             if (string.IsNullOrWhiteSpace(text)) return new(AiResultStatus.Failed, null, "AI 沒有回傳內容");
             var e = new QuestionExplanation
             {
@@ -78,9 +78,24 @@ public class AiExplanationService(AppDbContext db, HttpClient http, IOptions<AiO
         "逐一說明每個選項為什麼對或錯。引用法條、條號、年份、數據時，只有在你確定時才寫；不確定就說「請查證原始法規」。" +
         "不知道就直說不知道，不要編造。不要使用 Markdown 標題，段落簡短。";
 
+    public const string EssaySystemPrompt =
+        "你是台灣公職考試的申論題老師，用繁體中文寫一份「參考答題架構」，不是標準答案。" +
+        "先點出題目在考什麼，再列出答題架構（每一段要寫什麼），最後提醒常見失分點。" +
+        "引用法條、條號、釋字、學者、年份、數據時，只有在你確定時才寫；不確定就寫「請查證原始法規」。" +
+        "不知道就直說不知道，不要編造。不要使用 Markdown 標題，段落簡短。";
+
+    public static string SystemPromptFor(Question q) => q.IsEssay ? EssaySystemPrompt : SystemPrompt;
+
     public static string BuildPrompt(Question q)
     {
         var sb = new System.Text.StringBuilder();
+        if (q.IsEssay)
+        {
+            sb.AppendLine($"考試：{q.Paper!.RocYear} 年 {q.Paper.ExamTitle}，科目：{q.Paper.SubjectName}，{q.Label}（申論題，沒有官方答案）");
+            sb.AppendLine($"題目：{Plain(q.Stem)}");
+            sb.AppendLine("請提供參考答題架構。");
+            return sb.ToString();
+        }
         sb.AppendLine($"考試：{q.Paper!.RocYear} 年 {q.Paper.ExamTitle}，科目：{q.Paper.SubjectName}，第 {q.Number} 題（{(q.Type == QuestionType.Multiple ? "複選" : "單選")}）");
         if (!string.IsNullOrWhiteSpace(q.Passage)) sb.AppendLine($"題組文章：{Plain(q.Passage)}");
         sb.AppendLine($"題目：{Plain(q.Stem)}");
@@ -92,7 +107,7 @@ public class AiExplanationService(AppDbContext db, HttpClient http, IOptions<AiO
 
     private static string Plain(string s) => s.Replace("[u]", "").Replace("[/u]", "");
 
-    private async Task<string?> CallAsync(string prompt, CancellationToken ct)
+    private async Task<string?> CallAsync(string system, string prompt, CancellationToken ct)
     {
         using var req = new HttpRequestMessage(HttpMethod.Post, "https://api.anthropic.com/v1/messages")
         {
@@ -100,7 +115,7 @@ public class AiExplanationService(AppDbContext db, HttpClient http, IOptions<AiO
             {
                 model = options.Value.Model,
                 max_tokens = options.Value.MaxTokens,
-                system = SystemPrompt,
+                system,
                 messages = new[] { new { role = "user", content = prompt } }
             })
         };

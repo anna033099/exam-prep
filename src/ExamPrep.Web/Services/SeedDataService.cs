@@ -44,6 +44,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
             exam.Summary = e.Summary;
             exam.OfficialUrl = e.OfficialUrl;
             exam.SortOrder = e.SortOrder;
+            exam.Group = e.Group;
             upserted++;
 
             foreach (var s in e.Sessions)
@@ -88,13 +89,19 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         var examIds = await db.Exams.ToDictionaryAsync(e => e.Slug, e => e.Id, ct);
         var existing = (await db.Papers.Select(p => new { p.ExamCode, p.PaperCode }).ToListAsync(ct))
             .Select(p => (p.ExamCode, p.PaperCode)).ToHashSet();
+        var bulk = db.Database.IsSqlServer();
         int papers = 0, questions = 0, skipped = 0;
-        foreach (var file in Directory.GetFiles(dir, "*.json").Order())
+        var files = Directory.GetFiles(dir, "*.json").Concat(Directory.GetFiles(dir, "*.json.gz")).Order();
+        foreach (var file in files)
         {
-            var pack = JsonSerializer.Deserialize<List<PaperSeed>>(await File.ReadAllTextAsync(file, ct), Json)!;
+            List<PaperSeed> pack;
+            await using (var fs = File.OpenRead(file))
+            await using (Stream src = file.EndsWith(".gz") ? new System.IO.Compression.GZipStream(fs, System.IO.Compression.CompressionMode.Decompress) : fs)
+                pack = (await JsonSerializer.DeserializeAsync<List<PaperSeed>>(src, Json, ct))!;
+            var added = new List<(QuestionPaper Paper, List<Question> Questions)>();
             foreach (var p in pack)
             {
-                if (existing.Contains((p.ExamCode, p.PaperCode)))
+                if (!existing.Add((p.ExamCode, p.PaperCode)))
                 {
                     skipped++;
                     continue;
@@ -108,39 +115,76 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
                     ExamId = examIds.TryGetValue(p.ExamSlug, out var id) ? id : null,
                     ExamTitle = p.ExamTitle,
                     RocYear = p.RocYear,
-                    Categories = string.Join("、", p.Categories),
-                    SubjectName = p.SubjectName,
+                    Categories = Truncate(string.Join("、", p.Categories), 2000),
+                    SubjectName = Truncate(p.SubjectName, 200),
                     SourceQuestionUrl = p.SourceQuestionUrl,
-                    SourceAnswerUrl = p.SourceAnswerUrl,
-                    AnswerNote = p.AnswerNote ?? "",
+                    SourceAnswerUrl = p.SourceAnswerUrl ?? "",
+                    AnswerNote = Truncate(p.AnswerNote ?? "", 2000),
                     SourceNote = p.SourceNote ?? "",
                     OfficialQuestionCount = p.OfficialQuestionCount,
                     ExcludedJson = JsonSerializer.Serialize(p.Excluded),
                     ImportedAt = DateTime.UtcNow,
-                    Questions = withheld ? new List<Question>() : p.Questions.Select(q => new Question
-                    {
-                        Number = q.No,
-                        Type = q.Type == "multi" ? QuestionType.Multiple : QuestionType.Single,
-                        Passage = q.Passage,
-                        Stem = q.Stem,
-                        OptionA = q.Options["A"],
-                        OptionB = q.Options["B"],
-                        OptionC = q.Options["C"],
-                        OptionD = q.Options["D"],
-                        OptionE = q.Options.GetValueOrDefault("E"),
-                        Answer = AnswerChecker.Normalize(q.Answer)
-                    }).ToList()
                 };
+                // 這份試卷適用的所有考試類別（主類別＋共用的其他類別）
+                foreach (var slug in p.ExamSlugs.Prepend(p.ExamSlug).Distinct())
+                    if (examIds.TryGetValue(slug, out var eid))
+                        paper.ExamLinks.Add(new PaperExamLink { ExamId = eid });
+                var qs = withheld ? new List<Question>() : p.Questions.Select(q => new Question
+                {
+                    Number = q.No,
+                    Type = q.Type == "multi" ? QuestionType.Multiple : QuestionType.Single,
+                    Passage = q.Passage,
+                    Stem = q.Stem,
+                    OptionA = q.Options["A"],
+                    OptionB = q.Options["B"],
+                    OptionC = q.Options["C"],
+                    OptionD = q.Options["D"],
+                    OptionE = q.Options.GetValueOrDefault("E"),
+                    Answer = AnswerChecker.Normalize(q.Answer)
+                }).Concat(p.Essays.Select(e => new Question
+                {
+                    Number = Question.EssayNumberBase + e.No,
+                    Type = QuestionType.Essay,
+                    Stem = e.Text,
+                    Remark = e.Remark
+                })).ToList();
+                if (!bulk) paper.Questions = qs;
                 db.Papers.Add(paper);
-                existing.Add((p.ExamCode, p.PaperCode));
+                added.Add((paper, qs));
                 papers++;
-                questions += paper.Questions.Count;
+                questions += qs.Count;
             }
             await db.SaveChangesAsync(ct);
+            if (bulk && added.Count > 0)
+                await BulkInsertQuestionsAsync(added, ct);
             db.ChangeTracker.Clear();
         }
+        if (papers > 0) CatalogCache.Clear();
         log.LogInformation("官方試題匯入：新增 {Papers} 份、{Questions} 題，略過 {Skipped} 份既有試卷", papers, questions, skipped);
         return new(0, 0, papers, questions, skipped);
+    }
+
+    private static string Truncate(string s, int max) => s.Length <= max ? s : s[..max];
+
+    /// <summary>SQL Server 上用 SqlBulkCopy 寫入題目：題庫有數十萬題，逐筆 INSERT 太慢。</summary>
+    private async Task BulkInsertQuestionsAsync(List<(QuestionPaper Paper, List<Question> Questions)> added, CancellationToken ct)
+    {
+        var t = new System.Data.DataTable();
+        foreach (var (name, type) in new (string, Type)[] {
+            ("PaperId", typeof(int)), ("Number", typeof(int)), ("Type", typeof(int)), ("Passage", typeof(string)), ("Stem", typeof(string)),
+            ("OptionA", typeof(string)), ("OptionB", typeof(string)), ("OptionC", typeof(string)), ("OptionD", typeof(string)),
+            ("OptionE", typeof(string)), ("Answer", typeof(string)), ("Remark", typeof(string)) })
+            t.Columns.Add(name, type);
+        foreach (var (paper, qs) in added)
+            foreach (var q in qs)
+                t.Rows.Add(paper.Id, q.Number, (int)q.Type, (object?)q.Passage ?? DBNull.Value, q.Stem, q.OptionA, q.OptionB, q.OptionC, q.OptionD,
+                    (object?)q.OptionE ?? DBNull.Value, q.Answer, (object?)q.Remark ?? DBNull.Value);
+        if (t.Rows.Count == 0) return;
+        var conn = (Microsoft.Data.SqlClient.SqlConnection)db.Database.GetDbConnection();
+        if (conn.State != System.Data.ConnectionState.Open) await conn.OpenAsync(ct);
+        using var copy = new Microsoft.Data.SqlClient.SqlBulkCopy(conn) { DestinationTableName = "Questions", BatchSize = 5000, BulkCopyTimeout = 600 };
+        foreach (System.Data.DataColumn c in t.Columns) copy.ColumnMappings.Add(c.ColumnName, c.ColumnName);
+        await copy.WriteToServerAsync(t, ct);
     }
 
     /// <summary>
@@ -187,6 +231,7 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         public string Summary { get; set; } = "";
         public string OfficialUrl { get; set; } = "";
         public int SortOrder { get; set; }
+        public string Group { get; set; } = "";
         public List<SessionSeed> Sessions { get; set; } = new();
         public List<SubjectSeed> Subjects { get; set; } = new();
     }
@@ -226,9 +271,19 @@ public class SeedDataService(AppDbContext db, IWebHostEnvironment env, ILogger<S
         public string SourceAnswerUrl { get; set; } = "";
         public string? AnswerNote { get; set; }
         public string? SourceNote { get; set; }
+        /// <summary>這份試卷也適用的其他考試類別（同一場考試多種特考共用的科目）。</summary>
+        public List<string> ExamSlugs { get; set; } = new();
         public int OfficialQuestionCount { get; set; }
         public List<ExcludedSeed> Excluded { get; set; } = new();
         public List<QuestionSeed> Questions { get; set; } = new();
+        public List<EssaySeed> Essays { get; set; } = new();
+    }
+
+    public sealed class EssaySeed
+    {
+        public int No { get; set; }
+        public string Text { get; set; } = "";
+        public string? Remark { get; set; }
     }
 
     public sealed class ExcludedSeed

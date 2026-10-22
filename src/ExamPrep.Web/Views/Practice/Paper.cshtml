@@ -4,6 +4,7 @@
     ViewData["Title"] = Model.SubjectName;
     var excluded = (List<SeedDataService.ExcludedSeed>)ViewBag.Excluded;
     var count = (int)ViewBag.Count;
+    var essays = (List<Question>)ViewBag.Essays;
 }
 <p class="eyebrow mb-1"><a asp-action="Index">題庫</a> ／ @Model.RocYear 年</p>
 <h1>@Model.SubjectName</h1>
@@ -15,9 +16,20 @@
             <table class="table-paper">
                 <tr><td class="text-muted">試題代號</td><td class="num">@Model.PaperCode</td></tr>
                 <tr><td class="text-muted">適用類科</td><td>@Model.Categories</td></tr>
-                <tr><td class="text-muted">收錄題數</td><td><span class="num">@count</span> ／ 官方 <span class="num">@Model.OfficialQuestionCount</span> 題</td></tr>
+                @if (Model.OfficialQuestionCount > 0)
+                {
+                    <tr><td class="text-muted">選擇題</td><td>收錄 <span class="num">@count</span> ／ 官方 <span class="num">@Model.OfficialQuestionCount</span> 題</td></tr>
+                }
+                @if (essays.Count > 0)
+                {
+                    <tr><td class="text-muted">申論題</td><td><span class="num">@essays.Count</span> 題（沒有官方標準答案，不計分）</td></tr>
+                }
                 <tr><td class="text-muted">原始檔案</td><td>
-                    @if (Model.SourceAnswerUrl == Model.SourceQuestionUrl)
+                    @if (string.IsNullOrEmpty(Model.SourceAnswerUrl))
+                    {
+                        <a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題 PDF </a>
+                    }
+                    else if (Model.SourceAnswerUrl == Model.SourceQuestionUrl)
                     {
                         <a href="@Model.SourceQuestionUrl" target="_blank" rel="noopener">試題與答案 PDF </a>
                     }
@@ -39,6 +51,10 @@
                 @if (Model.ContentWithheld)
                 {
                     <p class="flash mb-0">公開版不提供這份試卷的題目內文（公司自辦甄試的試題可能受著作權保護），請由上方原始檔案連結查看。</p>
+                }
+                else if (count == 0)
+                {
+                    <p class="text-muted mb-0">這份試卷沒有可作答的選擇題，申論題請看下方。</p>
                 }
                 else if (SignIn.IsSignedIn(User))
                 {
@@ -84,10 +100,26 @@
                 <table class="table-paper">
                     @foreach (var e in excluded)
                     {
-                        <tr><td class="num">第 @e.No 題</td><td class="small">@e.Reason</td></tr>
+                        <tr><td class="num">@(e.No > Question.EssayNumberBase ? $"申論第{Question.CnNumber(e.No - Question.EssayNumberBase)}題" : $"第 {e.No} 題")</td><td class="small">@e.Reason</td></tr>
                     }
                 </table>
             }
         </div>
     </div>
 </div>
+
+@if (essays.Count > 0)
+{
+    <div class="sheet mt-3" id="essays">
+        <div class="sheet-title"><h2>申論題</h2><span class="pill">不計分</span></div>
+        <p class="small text-muted">文字逐行取自原卷並與原卷比對過；標示 ⚠ 的題目含圖表或特殊符號，請對照原卷 PDF。點題號可以寫筆記、討論或看 AI 參考解答。</p>
+        @foreach (var e in essays)
+        {
+            <div class="essay-item">
+                <a class="fw-bold" asp-controller="Question" asp-action="Detail" asp-route-id="@e.Id">@e.Label</a>
+                @if (!string.IsNullOrEmpty(e.Remark)) { <span class="small text-warning-emphasis ms-2">⚠ @e.Remark</span> }
+                <div class="essay-text">@QuestionText.Render(e.Stem)</div>
+            </div>
+        }
+    </div>
+}

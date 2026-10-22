@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<ExamSubjectInfo> ExamSubjects => Set<ExamSubjectInfo>();
     public DbSet<QuestionPaper> Papers => Set<QuestionPaper>();
     public DbSet<Question> Questions => Set<Question>();
+    public DbSet<PaperExamLink> PaperExamLinks => Set<PaperExamLink>();
     public DbSet<PracticeSession> PracticeSessions => Set<PracticeSession>();
     public DbSet<PracticeAnswer> PracticeAnswers => Set<PracticeAnswer>();
     public DbSet<WrongQuestion> WrongQuestions => Set<WrongQuestion>();
@@ -36,6 +37,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
         b.Entity<QuestionPaper>().HasIndex(p => new { p.ExamCode, p.PaperCode }).IsUnique();
         b.Entity<QuestionPaper>().HasIndex(p => p.SubjectName);
+        b.Entity<QuestionPaper>().HasIndex(p => p.RocYear);
+        b.Entity<PaperExamLink>().HasKey(l => new { l.ExamId, l.PaperId });
+        b.Entity<PaperExamLink>().HasIndex(l => l.PaperId);
+        b.Entity<PaperExamLink>().HasOne(l => l.Paper).WithMany(p => p.ExamLinks).HasForeignKey(l => l.PaperId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<PaperExamLink>().HasOne(l => l.Exam).WithMany().HasForeignKey(l => l.ExamId).OnDelete(DeleteBehavior.NoAction);
+        b.Entity<Question>().HasIndex(q => q.Type);
         b.Entity<QuestionPaper>().HasOne(p => p.Exam).WithMany().OnDelete(DeleteBehavior.SetNull);
 
         b.Entity<Question>().HasIndex(q => new { q.PaperId, q.Number }).IsUnique();

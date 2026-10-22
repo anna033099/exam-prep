@@ -13,7 +13,13 @@ public class ApplicationUser : IdentityUser
 public enum OrganizerType
 {
     NationalExam = 0,
-    StateEnterprise = 1
+    StateEnterprise = 1,
+    /// <summary>證照考試（技術士、金融、保險等）。</summary>
+    Certification = 2,
+    /// <summary>升學考試（學測、會考、統測等）。</summary>
+    Admission = 3,
+    /// <summary>其他招考（教師甄試、農漁會等）。</summary>
+    Recruitment = 4
 }
 
 /// <summary>一種考試，例如「公務人員初等考試」「中華郵政職階人員甄試」。</summary>
@@ -42,6 +48,10 @@ public class Exam
     public string OfficialUrl { get; set; } = "";
 
     public int SortOrder { get; set; }
+
+    /// <summary>首頁與題庫的分類群組，例如「綜合國家考試」「警察・消防・海巡」。</summary>
+    [MaxLength(30)]
+    public string Group { get; set; } = "";
 
     public List<ExamSession> Sessions { get; set; } = new();
     public List<ExamSubjectInfo> Subjects { get; set; } = new();
@@ -152,12 +162,26 @@ public class QuestionPaper
     public DateTime ImportedAt { get; set; }
 
     public List<Question> Questions { get; set; } = new();
+
+    /// <summary>同一份試卷也屬於其他考試類別時（例如同一場考試多種特考共用的國文），在這裡連結。</summary>
+    public List<PaperExamLink> ExamLinks { get; set; } = new();
+}
+
+/// <summary>試卷與考試類別的多對多連結（包含 ExamId 本身）。</summary>
+public class PaperExamLink
+{
+    public int PaperId { get; set; }
+    public QuestionPaper? Paper { get; set; }
+    public int ExamId { get; set; }
+    public Exam? Exam { get; set; }
 }
 
 public enum QuestionType
 {
     Single = 0,
-    Multiple = 1
+    Multiple = 1,
+    /// <summary>申論題：只供閱讀、筆記與討論，沒有官方標準答案，不進入刷題計分。</summary>
+    Essay = 2
 }
 
 public class Question
@@ -180,6 +204,28 @@ public class Question
     /// <summary>標準答案，單選如 "C"，複選如 "BDE"（依字母排序）。</summary>
     [MaxLength(5)]
     public string Answer { get; set; } = "";
+
+    /// <summary>提醒文字，例如「本題含圖表，請對照原卷」。</summary>
+    [MaxLength(200)]
+    public string? Remark { get; set; }
+
+    public bool IsEssay => Type == QuestionType.Essay;
+
+    /// <summary>申論題的題號從 1001 起存放，避免與同卷測驗題（1、2、3…）衝突。</summary>
+    public const int EssayNumberBase = 1000;
+
+    private static readonly string[] Cn = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+
+    /// <summary>畫面上的題號：測驗題「第 3 題」、申論題「申論第二題」。</summary>
+    public string Label => IsEssay ? $"申論第{CnNumber(Number - EssayNumberBase)}題" : $"第 {Number} 題";
+
+    public static string CnNumber(int n) => n switch
+    {
+        <= 10 and > 0 => Cn[n],
+        < 20 => "十" + Cn[n - 10],
+        < 100 => Cn[n / 10] + "十" + Cn[n % 10],
+        _ => n.ToString()
+    };
 
     public IEnumerable<(char Letter, string Text)> Options()
     {

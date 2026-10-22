@@ -21,7 +21,7 @@ else
                 <div class="yr">@q.Paper!.RocYear<small>年</small></div>
                 <div style="min-width:0">
                     <a class="name" asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">@QuestionText.Render(q.Stem.Length > 90 ? q.Stem[..90] + "…" : (string.IsNullOrEmpty(q.Stem) ? "（題組題）" : q.Stem))</a>
-                    <div class="sub">@q.Paper.SubjectName・第 @q.Number 題</div>
+                    <div class="sub">@q.Paper.SubjectName・@q.Label</div>
                 </div>
                 <div class="act">
                     <form asp-controller="Question" asp-action="Bookmark" asp-route-id="@q.Id" method="post">

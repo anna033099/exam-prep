@@ -8,7 +8,7 @@
 <section class="hero">
     <div>
         <h1>公職考古題，<br />一題一題刷到會。</h1>
-        <p class="hero-lead">收錄初等、高普考、地方特考 15 年的官方選擇題，以及郵局、中華電信的歷屆試題。答錯自動進錯題本，讀書時數和考試倒數都在同一個地方。</p>
+        <p class="hero-lead">收錄 @Model.ExamCount 類考試的歷屆試題：高普考、地特、初等、司法、警察、關務、鐵路、專技與醫事人員，以及國營事業招考。選擇題附官方答案，答錯自動進錯題本；申論題可以閱讀、寫筆記和討論。</p>
         <form class="hero-search" method="get" asp-controller="Practice" asp-action="Index" role="search">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7f918c" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input name="q" type="search" placeholder="輸入科目，例如：行政學、計算機概論" aria-label="搜尋科目" />
@@ -23,6 +23,7 @@
         </div>
         <div class="hero-facts">
             <div><strong>@Model.QuestionCount.ToString("N0")</strong> 題選擇題</div>
+            <div><strong>@Model.EssayCount.ToString("N0")</strong> 題申論題</div>
             <div><strong>@Model.PaperCount.ToString("N0")</strong> 份試卷</div>
             <div>每題附<strong> 原卷 PDF</strong> 連結</div>
         </div>
@@ -43,7 +44,7 @@
         @if (Model.Sample is { } q)
         {
             <div class="try-body" id="try" data-answer="@q.Answer">
-                <div class="src">試試看・@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</div>
+                <div class="src">試試看・@q.Paper!.RocYear 年 @q.Paper.SubjectName @q.Label</div>
                 <div class="stem">@QuestionText.Render(q.Stem)</div>
                 @foreach (var (letter, text) in q.Options())
                 {
@@ -57,16 +58,19 @@
 
 <section class="section">
     <h2>選擇你要考的</h2>
+    @foreach (var grp in Model.ExamStats.GroupBy(s => s.Exam.Group))
+    {
+    <h3 class="exam-group-title">@(string.IsNullOrEmpty(grp.Key) ? "其他" : grp.Key)</h3>
     <div class="exam-grid">
-        @foreach (var e in Model.ExamStats)
+        @foreach (var e in grp)
         {
             <a class="exam-card" asp-controller="Practice" asp-action="Index" asp-route-exam="@e.Exam.Slug">
                 <div class="org">@e.Exam.Organizer</div>
                 <h3>@e.Exam.ShortName</h3>
-                @if (e.Questions > 0)
+                @if (e.Papers > 0)
                 {
-                    <div class="count">@e.Questions.ToString("N0") <small>題</small></div>
-                    <div class="years">@(e.FirstYear == e.LastYear ? $"{e.FirstYear} 年" : $"{e.FirstYear}–{e.LastYear} 年")・@e.Papers 份試卷</div>
+                    <div class="count">@((e.Questions + e.Essays).ToString("N0")) <small>題</small></div>
+                    <div class="years">@(e.FirstYear == e.LastYear ? $"{e.FirstYear} 年" : $"{e.FirstYear}–{e.LastYear} 年")・@e.Papers.ToString("N0") 份試卷</div>
                 }
                 else
                 {
@@ -75,6 +79,7 @@
             </a>
         }
     </div>
+    }
 </section>
 
 <section class="section">

@@ -4,6 +4,9 @@
 每題再與原卷逐字比對、並以 pdftotext 獨立重讀答案，任何不一致即排除。
 """
 import json, re, sys, os, hashlib, subprocess, collections
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+from textnorm import canon
 sys.path.insert(0, os.path.dirname(__file__))
 from parse_tabf import build
 import pymupdf as fitz
@@ -14,6 +17,7 @@ MIRROR_PAGE = 'https://www.1111job.com.tw/news.asp?ano=3146'
 
 
 def norm(s):
+    s = canon(s or '')
     s = (s or '').replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s\x80-\x9f_-]', '', s)
 

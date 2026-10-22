@@ -29,6 +29,9 @@ public class PracticeModesTests
         var withheld = new QuestionPaper { ExamCode = "POST-114", PaperCode = "4", RocYear = 114, SubjectName = "行政學大意", Exam = hidden, ContentWithheld = true, Questions = [Q(1)] };
         db.Papers.AddRange(p113, p115, law, withheld);
         db.SaveChanges();
+        foreach (var p in new[] { p113, p115, law, withheld })
+            db.PaperExamLinks.Add(new PaperExamLink { PaperId = p.Id, ExamId = p.Exam!.Id });
+        db.SaveChanges();
         var clock = new Clock();
         return (db, new PracticeService(db, clock), clock, db.Questions.OrderBy(q => q.Id).ToList());
     }
@@ -131,6 +134,21 @@ public class PracticeModesTests
         Assert.Equal(lawIds, ids.Take(2).Order().ToList());   // 到期錯題排在最前面
         Assert.DoesNotContain(qs.Single(q => db.Papers.Find(q.PaperId)!.ContentWithheld).Id, ids);
         Assert.True(daily!.Instant);
+    }
+
+    [Fact]
+    public async Task Essay_questions_are_never_put_into_practice_sessions()
+    {
+        var (db, svc, _, _) = Setup();
+        var paper = db.Papers.First(p => p.PaperCode == "2");
+        db.Questions.Add(new Question { PaperId = paper.Id, Number = Question.EssayNumberBase + 1, Type = QuestionType.Essay, Stem = "一、請說明比例原則。（25分）" });
+        db.SaveChanges();
+        var s = await svc.CreateFromPaperAsync("u", paper.Id);
+        Assert.Equal(2, svc.QuestionIdsOf(s).Count);
+        var c = await svc.CreateCustomAsync("u", new CustomQuery(null, null, null, [], 50, QuestionSource.All, true), false, null);
+        Assert.DoesNotContain(db.Questions.Single(q => q.Type == QuestionType.Essay).Id, svc.QuestionIdsOf(c!));
+        Assert.Equal("申論第一題", db.Questions.Single(q => q.Type == QuestionType.Essay).Label);
+        Assert.Equal("二十三", Question.CnNumber(23));
     }
 
     [Fact]

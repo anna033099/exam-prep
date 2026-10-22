@@ -2,46 +2,63 @@
 @{
     var q = Model.Question;
     var p = q.Paper!;
-    ViewData["Title"] = $"{p.RocYear} 年 {p.SubjectName} 第 {q.Number} 題";
+    ViewData["Title"] = $"{p.RocYear} 年 {p.SubjectName} {q.Label}";
     var multi = q.Type == QuestionType.Multiple;
     var here = Context.Request.Path.ToString();
     string[] kinds = ["題目文字有誤", "選項文字有誤", "答案有誤", "AI 詳解有誤", "其他"];
 }
-<p class="eyebrow mb-1"><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.RocYear 年 @p.SubjectName</a> ／ 第 @q.Number 題</p>
+<p class="eyebrow mb-1"><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.RocYear 年 @p.SubjectName</a> ／ @q.Label</p>
 
 <div class="row g-3">
     <div class="col-lg-8">
-        <section class="q" id="single" data-answer="@q.Answer">
-            @if (!string.IsNullOrEmpty(q.Passage)) { <div class="q-passage">@QuestionText.Render(q.Passage)</div> }
-            <div class="q-head">
-                <span class="q-no">@q.Number.</span>
-                <div class="q-stem">
-                    @if (multi) { <span class="pill pill-amber me-1">複選</span> }
-                    @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依上方題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+        @if (q.IsEssay)
+        {
+            <section class="q essay">
+                <div class="q-head">
+                    <span class="pill me-2">申論題・不計分</span>
                 </div>
-            </div>
-            <ul class="opts">
-                @foreach (var (letter, text) in q.Options())
-                {
-                    <li class="opt @(multi ? "multi" : "")" data-letter="@letter"><label><span class="letter">@letter</span><span>@QuestionText.Render(text)</span></label></li>
-                }
-            </ul>
-            <div class="q-foot">
-                <button type="button" class="btn btn-sm btn-ink" id="reveal">看答案</button>
-                <span id="answer-text" class="fw-bold" hidden>官方答案：@q.Answer</span>
-                @if (Model.LastAnswer is { } la)
-                {
-                    <span>你上次作答：@(string.IsNullOrEmpty(la.Selected) ? "未作答" : la.Selected)（@(la.IsCorrect ? "答對" : "答錯")）</span>
-                }
-            </div>
-        </section>
+                <div class="q-stem essay-text">@QuestionText.Render(q.Stem)</div>
+                @if (!string.IsNullOrEmpty(q.Remark)) { <p class="small text-warning-emphasis mt-2 mb-0">⚠ @q.Remark</p> }
+                <div class="q-foot">
+                    <span>申論題沒有官方標準答案。</span>
+                    <a href="@p.SourceQuestionUrl" target="_blank" rel="noopener">開啟原卷 PDF</a>
+                </div>
+            </section>
+        }
+        else
+        {
+            <section class="q" id="single" data-answer="@q.Answer">
+                @if (!string.IsNullOrEmpty(q.Passage)) { <div class="q-passage">@QuestionText.Render(q.Passage)</div> }
+                <div class="q-head">
+                    <span class="q-no">@q.Number.</span>
+                    <div class="q-stem">
+                        @if (multi) { <span class="pill pill-amber me-1">複選</span> }
+                        @if (string.IsNullOrEmpty(q.Stem)) { <span class="text-muted">（依上方題組文章作答）</span> } else { @QuestionText.Render(q.Stem) }
+                    </div>
+                </div>
+                <ul class="opts">
+                    @foreach (var (letter, text) in q.Options())
+                    {
+                        <li class="opt @(multi ? "multi" : "")" data-letter="@letter"><label><span class="letter">@letter</span><span>@QuestionText.Render(text)</span></label></li>
+                    }
+                </ul>
+                <div class="q-foot">
+                    <button type="button" class="btn btn-sm btn-ink" id="reveal">看答案</button>
+                    <span id="answer-text" class="fw-bold" hidden>官方答案：@q.Answer</span>
+                    @if (Model.LastAnswer is { } la)
+                    {
+                        <span>你上次作答：@(string.IsNullOrEmpty(la.Selected) ? "未作答" : la.Selected)（@(la.IsCorrect ? "答對" : "答錯")）</span>
+                    }
+                </div>
+            </section>
+        }
 
         <div class="sheet" id="ai">
-            <div class="sheet-title"><h2>AI 詳解</h2><span class="pill pill-amber">AI 生成・可能有誤</span></div>
+            <div class="sheet-title"><h2>@(q.IsEssay ? "AI 參考解答" : "AI 詳解")</h2><span class="pill pill-amber">AI 生成・可能有誤</span></div>
             @if (Model.Explanation is { } ex)
             {
                 <div style="white-space:pre-wrap">@ex.Body</div>
-                <p class="small text-muted mt-3 mb-0">由 @ex.Model 於 @TaipeiDate.ToTaipeiTime(ex.CreatedAt).ToString("yyyy/MM/dd") 產生。這份解析不是官方或老師撰寫，以官方答案（@q.Answer）與教科書、法規原文為準；發現錯誤請在下方回報。</p>
+                <p class="small text-muted mt-3 mb-0">由 @ex.Model 於 @TaipeiDate.ToTaipeiTime(ex.CreatedAt).ToString("yyyy/MM/dd") 產生。這份內容不是官方或老師撰寫，@(q.IsEssay ? "申論題沒有官方答案，請以教科書與法規原文為準" : $"以官方答案（{q.Answer}）與教科書、法規原文為準")；發現錯誤請在下方回報。</p>
             }
             else if (!Model.AiEnabled)
             {
@@ -53,9 +70,9 @@
             }
             else
             {
-                <p class="text-muted">這題還沒有解析。AI 會根據官方答案（@q.Answer）逐一說明每個選項，內容可能有誤，請搭配教材查證。</p>
+                <p class="text-muted">@(q.IsEssay ? "這題還沒有參考解答。AI 會整理答題架構與可引用的法條或理論，申論題沒有官方答案，內容可能有誤，請搭配教材查證。" : $"這題還沒有解析。AI 會根據官方答案（{q.Answer}）逐一說明每個選項，內容可能有誤，請搭配教材查證。")</p>
                 <form asp-action="Explain" asp-route-id="@q.Id" method="post">
-                    <button class="btn btn-line" type="submit">產生 AI 詳解</button>
+                    <button class="btn btn-line" type="submit">@(q.IsEssay ? "產生 AI 參考解答" : "產生 AI 詳解")</button>
                 </form>
             }
         </div>

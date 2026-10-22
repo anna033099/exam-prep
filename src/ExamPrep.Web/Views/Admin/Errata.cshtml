@@ -18,7 +18,7 @@
     var q = e.Question!;
     <div class="sheet">
         <div class="d-flex justify-content-between gap-2 flex-wrap">
-            <div><span class="pill">@kinds[(int)e.Kind]</span> <a asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</a></div>
+            <div><span class="pill">@kinds[(int)e.Kind]</span> <a asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">@q.Paper!.RocYear 年 @q.Paper.SubjectName @q.Label</a></div>
             <span class="small text-muted">@TaipeiDate.ToTaipeiTime(e.CreatedAt).ToString("yyyy/MM/dd HH:mm")</span>
         </div>
         <p class="my-2" style="white-space:pre-wrap">@e.Detail</p>

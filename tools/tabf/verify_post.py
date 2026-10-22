@@ -1,7 +1,11 @@
 """獨立驗證郵局試題：以 pdftotext 重新讀取【n】題號，比對答案；並確認題目文字逐字出現在原卷。"""
 import json, re, subprocess, collections, sys
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+from textnorm import canon
 import pymupdf as fitz
 def norm(s):
+    s = canon(s or '')
     s = (s or '').replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s-\x80-\x9f_]', '', s)
 

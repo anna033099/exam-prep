@@ -1,5 +1,8 @@
 """把台灣金融研訓院公告的中華郵政考古題轉成網站試題包，並逐字比對原卷。"""
 import json, re, sys, os, hashlib, collections
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))))
+from textnorm import canon
 sys.path.insert(0, os.path.dirname(__file__))
 from parse_tabf import build
 import pymupdf as fitz
@@ -9,6 +12,7 @@ rows = json.load(open('post_manifest.json', encoding='utf-8'))
 
 
 def norm(s):
+    s = canon(s or '')
     s = (s or '').replace('[u]', '').replace('[/u]', '').replace('＿＿＿', '')
     return re.sub(r'[\s-\x80-\x9f_]', '', s)
 

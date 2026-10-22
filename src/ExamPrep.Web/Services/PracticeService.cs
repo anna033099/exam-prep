@@ -35,7 +35,7 @@ public class PracticeService(AppDbContext db, TimeProvider clock)
     private DateTime Now => clock.GetUtcNow().UtcDateTime;
 
     /// <summary>可出題的題目（排除公開模式下不提供內文的試卷）。</summary>
-    private IQueryable<Question> Playable => db.Questions.Where(q => !q.Paper!.ContentWithheld);
+    private IQueryable<Question> Playable => db.Questions.Where(q => !q.Paper!.ContentWithheld && q.Type != QuestionType.Essay);
 
     public async Task<PracticeSession> CreateFromPaperAsync(string userId, int paperId, bool instant = false, int? timeLimitMinutes = null)
     {
@@ -73,7 +73,7 @@ public class PracticeService(AppDbContext db, TimeProvider clock)
     public async Task<PracticeSession?> CreateCustomAsync(string userId, CustomQuery c, bool instant, int? timeLimitMinutes)
     {
         var q = Playable;
-        if (!string.IsNullOrEmpty(c.ExamSlug)) q = q.Where(x => x.Paper!.Exam!.Slug == c.ExamSlug);
+        if (!string.IsNullOrEmpty(c.ExamSlug)) q = q.Where(x => x.Paper!.ExamLinks.Any(l => l.Exam!.Slug == c.ExamSlug));
         if (c.YearFrom is { } yf) q = q.Where(x => x.Paper!.RocYear >= yf);
         if (c.YearTo is { } yt) q = q.Where(x => x.Paper!.RocYear <= yt);
         if (c.Subjects.Count > 0) q = q.Where(x => c.Subjects.Contains(x.Paper!.SubjectName));

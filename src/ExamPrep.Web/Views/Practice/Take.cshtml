@@ -71,7 +71,7 @@
                         @(done.IsCorrect ? "答對" : $"答錯，正解 {q.Answer}")
                     }
                 </span>
-                <span>出處：@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題</span>
+                <span>出處：@q.Paper!.RocYear 年 @q.Paper.SubjectName @q.Label</span>
                 <a class="js-detail @(done is null ? "d-none" : "")" href="@Url.Action("Detail", "Question", new { id = q.Id })" target="_blank">討論與詳解</a>
             </div>
         </section>

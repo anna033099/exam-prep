@@ -1,12 +1,392 @@
 {
  "exams": [
   {
+   "slug": "gaopu",
+   "name": "公務人員高等考試三級考試暨普通考試",
+   "shortName": "高普考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "sortOrder": 1,
+   "officialUrl": "https://www.moex.gov.tw/",
+   "summary": "高考三級（大學以上）與普考（高中職以上）同期舉行，為公務人員主要的進用管道。普通科目為國文與法學知識與英文。",
+   "sessions": [
+    {
+     "title": "116年普通考試",
+     "registrationStart": "2027-03-09",
+     "registrationEnd": "2027-03-18",
+     "examStart": "2027-07-02",
+     "examEnd": "2027-07-03",
+     "isTentative": true,
+     "note": "與高考三級同一報名期間。",
+     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
+     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
+    },
+    {
+     "title": "116年高等考試三級考試",
+     "registrationStart": "2027-03-09",
+     "registrationEnd": "2027-03-18",
+     "examStart": "2027-07-04",
+     "examEnd": "2027-07-06",
+     "isTentative": true,
+     "note": "與普考同一報名期間。",
+     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
+     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
+    }
+   ],
+   "subjects": [
+    {
+     "track": "普通考試｜一般行政",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜一般行政",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜一般行政",
+     "subjectName": "政治學概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜一般行政",
+     "subjectName": "行政學概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜一般行政",
+     "subjectName": "行政法概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜資訊處理",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜資訊處理",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜資訊處理",
+     "subjectName": "資通網路與安全概要",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜資訊處理",
+     "subjectName": "程式設計概要",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "普通考試｜資訊處理",
+     "subjectName": "計算機概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "政治學",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "行政學",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "公共政策",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜一般行政",
+     "subjectName": "行政法",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "資通網路與安全",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "資料庫應用",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "資料結構",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "高考三級｜資訊處理",
+     "subjectName": "資訊管理",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    }
+   ],
+   "group": "綜合國家考試"
+  },
+  {
+   "slug": "local",
+   "name": "特種考試地方政府公務人員考試",
+   "shortName": "地方特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "sortOrder": 2,
+   "officialUrl": "https://www.moex.gov.tw/",
+   "summary": "分區報考、分區錄取、分區分發，錄取後須在報考區服務一定年限，適合想固定在特定縣市（例如高屏）工作的考生。",
+   "sessions": [
+    {
+     "title": "115年地方特考",
+     "examStart": "2026-12-05",
+     "examEnd": "2026-12-07",
+     "isTentative": true,
+     "note": "報名已截止。",
+     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
+     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
+    },
+    {
+     "title": "116年地方特考",
+     "registrationStart": "2027-09-07",
+     "registrationEnd": "2027-09-16",
+     "examStart": "2027-12-04",
+     "examEnd": "2027-12-06",
+     "isTentative": true,
+     "note": "116年預定增設苗栗考區。",
+     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
+     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
+    }
+   ],
+   "subjects": [
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "政治學",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "公共政策",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "行政學",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜一般行政",
+     "subjectName": "行政法",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜一般行政",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜一般行政",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜一般行政",
+     "subjectName": "政治學概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜一般行政",
+     "subjectName": "行政學概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜一般行政",
+     "subjectName": "行政法概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "資料庫應用",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "資料結構",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "資訊管理",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "三等｜資訊處理",
+     "subjectName": "資通網路與安全",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜資訊處理",
+     "subjectName": "國文（作文與測驗）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜資訊處理",
+     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜資訊處理",
+     "subjectName": "資通網路與安全概要",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜資訊處理",
+     "subjectName": "程式設計概要",
+     "format": "申論",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    },
+    {
+     "track": "四等｜資訊處理",
+     "subjectName": "計算機概要",
+     "format": "含測驗題",
+     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
+     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
+    }
+   ],
+   "group": "綜合國家考試"
+  },
+  {
    "slug": "chudeng",
    "name": "公務人員初等考試",
    "shortName": "初等考試",
    "organizer": "考選部",
    "organizerType": "NationalExam",
-   "sortOrder": 1,
+   "sortOrder": 3,
    "officialUrl": "https://www.moex.gov.tw/",
    "summary": "國家考試中層級最基礎的公務人員考試，各科均為選擇題，錄取後以初等（委任第一職等）任用。",
    "sessions": [
@@ -471,385 +851,606 @@
      "sourceName": "考選部考畢試題查詢平臺（115年試題）",
      "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
     }
-   ]
+   ],
+   "group": "綜合國家考試"
   },
   {
-   "slug": "gaopu",
-   "name": "公務人員高等考試三級考試暨普通考試",
-   "shortName": "高普考",
+   "slug": "gaopu12",
+   "name": "公務人員高等考試一級暨二級考試",
+   "shortName": "高考一二級",
    "organizer": "考選部",
    "organizerType": "NationalExam",
-   "sortOrder": 2,
-   "officialUrl": "https://www.moex.gov.tw/",
-   "summary": "高考三級（大學以上）與普考（高中職以上）同期舉行，為公務人員主要的進用管道。普通科目為國文與法學知識與英文。",
-   "sessions": [
-    {
-     "title": "116年普通考試",
-     "registrationStart": "2027-03-09",
-     "registrationEnd": "2027-03-18",
-     "examStart": "2027-07-02",
-     "examEnd": "2027-07-03",
-     "isTentative": true,
-     "note": "與高考三級同一報名期間。",
-     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
-     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
-    },
-    {
-     "title": "116年高等考試三級考試",
-     "registrationStart": "2027-03-09",
-     "registrationEnd": "2027-03-18",
-     "examStart": "2027-07-04",
-     "examEnd": "2027-07-06",
-     "isTentative": true,
-     "note": "與普考同一報名期間。",
-     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
-     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
-    }
-   ],
-   "subjects": [
-    {
-     "track": "普通考試｜一般行政",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜一般行政",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜一般行政",
-     "subjectName": "政治學概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜一般行政",
-     "subjectName": "行政學概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜一般行政",
-     "subjectName": "行政法概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜資訊處理",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜資訊處理",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜資訊處理",
-     "subjectName": "資通網路與安全概要",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜資訊處理",
-     "subjectName": "程式設計概要",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "普通考試｜資訊處理",
-     "subjectName": "計算機概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "政治學",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "行政學",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "公共政策",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜一般行政",
-     "subjectName": "行政法",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "資通網路與安全",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "資料庫應用",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "資料結構",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "高考三級｜資訊處理",
-     "subjectName": "資訊管理",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（115年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    }
-   ]
+   "summary": "考選部辦理的公務人員高等考試一級暨二級考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "綜合國家考試",
+   "sortOrder": 4
   },
   {
-   "slug": "local",
-   "name": "特種考試地方政府公務人員考試",
-   "shortName": "地方特考",
+   "slug": "judicial",
+   "name": "公務人員特種考試司法人員考試",
+   "shortName": "司法特考",
    "organizer": "考選部",
    "organizerType": "NationalExam",
-   "sortOrder": 3,
-   "officialUrl": "https://www.moex.gov.tw/",
-   "summary": "分區報考、分區錄取、分區分發，錄取後須在報考區服務一定年限，適合想固定在特定縣市（例如高屏）工作的考生。",
-   "sessions": [
-    {
-     "title": "115年地方特考",
-     "examStart": "2026-12-05",
-     "examEnd": "2026-12-07",
-     "isTentative": true,
-     "note": "報名已截止。",
-     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
-     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
-    },
-    {
-     "title": "116年地方特考",
-     "registrationStart": "2027-09-07",
-     "registrationEnd": "2027-09-16",
-     "examStart": "2027-12-04",
-     "examEnd": "2027-12-06",
-     "isTentative": true,
-     "note": "116年預定增設苗栗考區。",
-     "sourceName": "高鋒公職整理之考選部《116年考試期日計畫表》（暫定）",
-     "sourceUrl": "https://www.kaozentaichung.com.tw/national-exam-calendar/"
-    }
-   ],
-   "subjects": [
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "政治學",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "公共政策",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "行政學",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜一般行政",
-     "subjectName": "行政法",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜一般行政",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜一般行政",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜一般行政",
-     "subjectName": "政治學概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜一般行政",
-     "subjectName": "行政學概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜一般行政",
-     "subjectName": "行政法概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "資料庫應用",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "資料結構",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "資訊管理",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "三等｜資訊處理",
-     "subjectName": "資通網路與安全",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜資訊處理",
-     "subjectName": "國文（作文與測驗）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜資訊處理",
-     "subjectName": "法學知識與英文（包括中華民國憲法、法學緒論、英文）",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜資訊處理",
-     "subjectName": "資通網路與安全概要",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜資訊處理",
-     "subjectName": "程式設計概要",
-     "format": "申論",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    },
-    {
-     "track": "四等｜資訊處理",
-     "subjectName": "計算機概要",
-     "format": "含測驗題",
-     "sourceName": "考選部考畢試題查詢平臺（114年試題）",
-     "sourceUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx"
-    }
-   ]
+   "summary": "考選部辦理的公務人員特種考試司法人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 5
+  },
+  {
+   "slug": "judge",
+   "name": "公務人員特種考試司法官考試",
+   "shortName": "司法官",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試司法官考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 6
+  },
+  {
+   "slug": "lawyer",
+   "name": "專門職業及技術人員高等考試律師考試",
+   "shortName": "律師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試律師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 7
+  },
+  {
+   "slug": "mjib",
+   "name": "公務人員特種考試法務部調查局調查人員考試",
+   "shortName": "調查局特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試法務部調查局調查人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 8
+  },
+  {
+   "slug": "foreign",
+   "name": "公務人員特種考試外交領事人員及外交行政人員考試",
+   "shortName": "外交特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試外交領事人員及外交行政人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 9
+  },
+  {
+   "slug": "immigration",
+   "name": "公務人員特種考試移民行政人員考試",
+   "shortName": "移民特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試移民行政人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 10
+  },
+  {
+   "slug": "nsb",
+   "name": "公務人員特種考試國家安全情報人員考試",
+   "shortName": "國安局特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試國家安全情報人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 11
+  },
+  {
+   "slug": "intltrade",
+   "name": "公務人員特種考試國際經濟商務人員考試",
+   "shortName": "國際經濟商務",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試國際經濟商務人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 12
+  },
+  {
+   "slug": "milaw",
+   "name": "國防法務官考試（含軍法官考試）",
+   "shortName": "國防法務官",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的國防法務官考試（含軍法官考試）。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "司法・調查・涉外",
+   "sortOrder": 13
+  },
+  {
+   "slug": "police",
+   "name": "公務人員特種考試警察人員考試",
+   "shortName": "警察特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試警察人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "警察・消防・海巡",
+   "sortOrder": 14
+  },
+  {
+   "slug": "gpolice",
+   "name": "公務人員特種考試一般警察人員考試",
+   "shortName": "一般警察特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試一般警察人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "警察・消防・海巡",
+   "sortOrder": 15
+  },
+  {
+   "slug": "coast",
+   "name": "公務人員特種考試海岸巡防人員考試",
+   "shortName": "海巡特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試海岸巡防人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "警察・消防・海巡",
+   "sortOrder": 16
+  },
+  {
+   "slug": "fire",
+   "name": "專門職業及技術人員考試消防設備人員",
+   "shortName": "消防設備人員",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員考試消防設備人員。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "警察・消防・海巡",
+   "sortOrder": 17
+  },
+  {
+   "slug": "tax",
+   "name": "公務人員特種考試稅務人員考試",
+   "shortName": "稅務特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試稅務人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "財稅・金融",
+   "sortOrder": 18
+  },
+  {
+   "slug": "insurance",
+   "name": "專門職業及技術人員普通考試保險代理人、保險經紀人及保險公證人",
+   "shortName": "保險代理經紀公證人",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試保險代理人、保險經紀人及保險公證人。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "財稅・金融",
+   "sortOrder": 19
+  },
+  {
+   "slug": "accountant",
+   "name": "專門職業及技術人員高等考試會計師考試",
+   "shortName": "會計師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試會計師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "財稅・金融",
+   "sortOrder": 20
+  },
+  {
+   "slug": "bookkeeper",
+   "name": "專門職業及技術人員普通考試記帳士考試",
+   "shortName": "記帳士",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試記帳士考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "財稅・金融",
+   "sortOrder": 21
+  },
+  {
+   "slug": "customs",
+   "name": "公務人員特種考試關務人員考試",
+   "shortName": "關務特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試關務人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "關務・地政・不動產",
+   "sortOrder": 22
+  },
+  {
+   "slug": "landagent",
+   "name": "專門職業及技術人員普通考試地政士考試",
+   "shortName": "地政士",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試地政士考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "關務・地政・不動產",
+   "sortOrder": 23
+  },
+  {
+   "slug": "realestate",
+   "name": "專門職業及技術人員普通考試不動產經紀人考試",
+   "shortName": "不動產經紀人",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試不動產經紀人考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "關務・地政・不動產",
+   "sortOrder": 24
+  },
+  {
+   "slug": "appraiser",
+   "name": "專門職業及技術人員高等考試不動產估價師考試",
+   "shortName": "不動產估價師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試不動產估價師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "關務・地政・不動產",
+   "sortOrder": 25
+  },
+  {
+   "slug": "cbroker",
+   "name": "專門職業及技術人員普通考試專責報關人員考試",
+   "shortName": "專責報關人員",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試專責報關人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "關務・地政・不動產",
+   "sortOrder": 26
+  },
+  {
+   "slug": "railway",
+   "name": "特種考試交通事業鐵路人員考試",
+   "shortName": "鐵路特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的特種考試交通事業鐵路人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "交通事業",
+   "sortOrder": 27
+  },
+  {
+   "slug": "aviation",
+   "name": "公務人員特種考試民航人員考試",
+   "shortName": "民航特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試民航人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "交通事業",
+   "sortOrder": 28
+  },
+  {
+   "slug": "railpromo",
+   "name": "交通事業鐵路人員升資考試",
+   "shortName": "鐵路人員升資",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的交通事業鐵路人員升資考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "交通事業",
+   "sortOrder": 29
+  },
+  {
+   "slug": "portpromo",
+   "name": "交通事業港務人員升資考試",
+   "shortName": "港務人員升資",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的交通事業港務人員升資考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "交通事業",
+   "sortOrder": 30
+  },
+  {
+   "slug": "highwaypromo",
+   "name": "交通事業公路人員升資考試",
+   "shortName": "公路人員升資",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的交通事業公路人員升資考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "交通事業",
+   "sortOrder": 31
+  },
+  {
+   "slug": "patent",
+   "name": "專門職業及技術人員高等考試專利師考試",
+   "shortName": "專利師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試專利師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 32
+  },
+  {
+   "slug": "guide",
+   "name": "專門職業及技術人員普通考試導遊人員、領隊人員考試",
+   "shortName": "導遊領隊",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員普通考試導遊人員、領隊人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 33
+  },
+  {
+   "slug": "optometry",
+   "name": "專門職業及技術人員考試驗光人員",
+   "shortName": "驗光人員",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員考試驗光人員。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 34
+  },
+  {
+   "slug": "socialwork",
+   "name": "專門職業及技術人員高等考試社會工作師考試",
+   "shortName": "社會工作師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試社會工作師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 35
+  },
+  {
+   "slug": "foodtech",
+   "name": "專門職業及技術人員高等考試食品技師考試",
+   "shortName": "食品技師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試食品技師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 36
+  },
+  {
+   "slug": "engineer",
+   "name": "專門職業及技術人員高等考試技師考試（食品技師以外）",
+   "shortName": "技師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試技師考試（食品技師以外）。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 37
+  },
+  {
+   "slug": "architect",
+   "name": "專門職業及技術人員高等考試建築師考試",
+   "shortName": "建築師",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等考試建築師考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 38
+  },
+  {
+   "slug": "pro_other",
+   "name": "其他專技人員考試（驗船師、引水人、不動產估價師以外等）",
+   "shortName": "其他專技",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的其他專技人員考試（驗船師、引水人、不動產估價師以外等）。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "專技・證照",
+   "sortOrder": 39
+  },
+  {
+   "slug": "medical",
+   "name": "專門職業及技術人員高等暨普通考試醫事人員",
+   "shortName": "醫事人員",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的專門職業及技術人員高等暨普通考試醫事人員。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "醫事人員",
+   "sortOrder": 40
+  },
+  {
+   "slug": "promo",
+   "name": "公務人員升官等考試",
+   "shortName": "公務人員升官等",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員升官等考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 41
+  },
+  {
+   "slug": "customspromo",
+   "name": "關務人員升官等考試",
+   "shortName": "關務升官等",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的關務人員升官等考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 42
+  },
+  {
+   "slug": "policepromo",
+   "name": "警察人員升官等考試",
+   "shortName": "警察升官等",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的警察人員升官等考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 43
+  },
+  {
+   "slug": "postpromo",
+   "name": "交通事業郵政人員升資考試",
+   "shortName": "郵政人員升資",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的交通事業郵政人員升資考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 44
+  },
+  {
+   "slug": "indigenous",
+   "name": "公務人員特種考試原住民族考試",
+   "shortName": "原住民特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試原住民族考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 45
+  },
+  {
+   "slug": "disability",
+   "name": "公務人員特種考試身心障礙人員考試",
+   "shortName": "身心障礙特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的公務人員特種考試身心障礙人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 46
+  },
+  {
+   "slug": "veteran",
+   "name": "特種考試退除役軍人轉任公務人員考試",
+   "shortName": "退除役特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的特種考試退除役軍人轉任公務人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 47
+  },
+  {
+   "slug": "military",
+   "name": "國軍上校以上軍官轉任公務人員考試",
+   "shortName": "國軍上校以上轉任",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的國軍上校以上軍官轉任公務人員考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 48
+  },
+  {
+   "slug": "special_other",
+   "name": "其他公務人員特種考試",
+   "shortName": "其他特考",
+   "organizer": "考選部",
+   "organizerType": "NationalExam",
+   "summary": "考選部辦理的其他公務人員特種考試。本站收錄考選部考畢試題查詢平臺公開的歷屆試題：選擇題附官方標準答案、可以作答計分；申論題可以閱讀、寫筆記與討論。",
+   "officialUrl": "https://wwwq.moex.gov.tw/exam/wFrmExamQandASearch.aspx",
+   "sessions": [],
+   "subjects": [],
+   "group": "升官等・轉任・其他",
+   "sortOrder": 49
   },
   {
    "slug": "post",
@@ -857,7 +1458,7 @@
    "shortName": "郵局招考",
    "organizer": "中華郵政",
    "organizerType": "StateEnterprise",
-   "sortOrder": 4,
+   "sortOrder": 50,
    "officialUrl": "https://www.post.gov.tw/",
    "summary": "中華郵政公司自辦的從業人員甄試（非國家考試），試務委託台灣金融研訓院辦理，分營運職、專業職(一)、專業職(二)內勤／外勤，錄取後依分發區分發。官方於甄試網站公告近年試題與選擇題答案。",
    "sessions": [
@@ -937,7 +1538,8 @@
      "sourceName": "考友社：115年中華郵政職階人員甄試",
      "sourceUrl": "https://www.examiner.com.tw/examInfo_detail.php?id=201"
     }
-   ]
+   ],
+   "group": "國營事業"
   },
   {
    "slug": "cht",
@@ -945,7 +1547,7 @@
    "shortName": "中華電信",
    "organizer": "中華電信",
    "organizerType": "StateEnterprise",
-   "sortOrder": 5,
+   "sortOrder": 51,
    "officialUrl": "https://www.cht.com.tw/",
    "summary": "中華電信自辦遴選（非國家考試），第一試筆試普通科目占 20%、專業科目占 80%，雙北、臺中、高雄設考區。101–109 年由台灣金融研訓院辦理，本站收錄 101–103 年研訓院版式的原卷（由 1111 人力銀行轉載保存）；近年改由松盟科技辦理，簡章明定「各節試卷一律回收，亦不公告試題及解答」，所以近年沒有公開試題。",
    "sessions": [
@@ -1060,7 +1662,8 @@
      "sourceName": "115年中華電信基層從業人員遴選簡章",
      "sourceUrl": "https://www.ipeecs.ncu.edu.tw/wp-content/uploads/2026/01/115年中華電信基層從業人員遴選簡章.pdf"
     }
-   ]
+   ],
+   "group": "國營事業"
   }
  ]
 }

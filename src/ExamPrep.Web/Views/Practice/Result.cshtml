@@ -66,7 +66,7 @@
         </ul>
         <div class="q-foot">
             <span>@(ok ? "✓ 答對" : string.IsNullOrEmpty(selected) ? "✗ 未作答" : $"✗ 你選 {selected}")・正解 <strong>@q.Answer</strong></span>
-            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName 第 @q.Number 題・<a asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">討論與詳解</a>・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
+            <span>@q.Paper!.RocYear 年 @q.Paper.SubjectName @q.Label・<a asp-controller="Question" asp-action="Detail" asp-route-id="@q.Id">討論與詳解</a>・<a href="@q.Paper.SourceQuestionUrl" target="_blank" rel="noopener">原卷</a></span>
             @if (Model.InWrongBook.Contains(q.Id)) { <span class="pill pill-red">在錯題本</span> }
         </div>
     </section>

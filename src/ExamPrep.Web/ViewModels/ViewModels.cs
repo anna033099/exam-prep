@@ -59,7 +59,7 @@ public record SubjectAccuracy(string Subject, int Answered, int Correct)
     public double Rate => Answered == 0 ? 0 : (double)Correct / Answered;
 }
 
-public record ExamStat(Exam Exam, int Papers, int Questions, int FirstYear, int LastYear);
+public record ExamStat(Exam Exam, int Papers, int Questions, int FirstYear, int LastYear, int Essays = 0);
 
 public class LandingVm
 {
@@ -67,6 +67,7 @@ public class LandingVm
     public Question? Sample { get; set; }
     public int PaperCount { get; set; }
     public int QuestionCount { get; set; }
+    public int EssayCount { get; set; }
     public int ExamCount { get; set; }
     public List<CountdownItem> Upcoming { get; set; } = new();
 }
@@ -87,7 +88,9 @@ public class PaperRow
     public string SubjectName { get; set; } = "";
     public string Categories { get; set; } = "";
     public string PaperCode { get; set; } = "";
+    /// <summary>收錄的選擇題數（不含申論題）。</summary>
     public int QuestionCount { get; set; }
+    public int EssayCount { get; set; }
     public int OfficialCount { get; set; }
     public string? ExamSlug { get; set; }
     public int? BestScore { get; set; }

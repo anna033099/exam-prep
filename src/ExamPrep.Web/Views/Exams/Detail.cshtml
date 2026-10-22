@@ -50,7 +50,7 @@
             <div class="sheet-title"><h2>歷屆試題</h2><a asp-controller="Practice" asp-action="Index" asp-route-exam="@Model.Slug">題庫</a></div>
             @if (papers.Count == 0)
             {
-                <p class="text-muted mb-0">此考試沒有官方公開的歷屆試題（說明見上方簡介）。若日後主辦單位公告，管理員可依官方檔案以 CSV 匯入。</p>
+                <p class="text-muted mb-0">目前沒有找到主辦單位公開的歷屆試題（說明見上方簡介）。</p>
             }
             else
             {
@@ -60,11 +60,11 @@
                         <tr>
                             <td class="num">@p.RocYear</td>
                             <td><a asp-controller="Practice" asp-action="Paper" asp-route-id="@p.Id">@p.SubjectName</a></td>
-                            <td class="num text-end">@p.QuestionCount 題</td>
+                            <td class="num text-end">@(p.QuestionCount + p.EssayCount) 題</td>
                         </tr>
                     }
                 </table>
-                @if (papers.Count > 12) { <p class="small text-muted mt-2 mb-0">共 @papers.Count 份，完整清單請到題庫。</p> }
+                @if ((int)ViewBag.PaperTotal > 12) { <p class="small text-muted mt-2 mb-0">共 @(((int)ViewBag.PaperTotal).ToString("N0")) 份，完整清單請到<a asp-controller="Practice" asp-action="Index" asp-route-exam="@Model.Slug">題庫</a>。</p> }
             }
         </div>
     </div>

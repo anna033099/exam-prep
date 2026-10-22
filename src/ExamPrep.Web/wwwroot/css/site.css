@@ -275,3 +275,14 @@ a.pill-red:hover { background: var(--green-dark); color: #fff; }
     .bar-labels { gap: .2rem; font-size: .6rem; }
     .greet { padding: 1.25rem; }
 }
+
+/* 考試分類群組與申論題 */
+.side .cat-group { margin-bottom: .25rem; }
+.side .cat-group > summary { cursor: pointer; font-size: .82rem; font-weight: 700; color: var(--ink-3); padding: .45rem .2rem; list-style: none; }
+.side .cat-group > summary::-webkit-details-marker { display: none; }
+.side .cat-group > summary::before { content: "▸"; display: inline-block; width: 1em; transition: transform .15s; }
+.side .cat-group[open] > summary::before { transform: rotate(90deg); }
+.essay-text { white-space: pre-line; line-height: 1.85; }
+.essay-item { padding: 1rem 0; border-top: 1px solid var(--line); }
+.essay-item:first-of-type { border-top: 0; }
+.exam-group-title { font-size: 1rem; font-weight: 700; color: var(--ink-3); margin: 1.6rem 0 .7rem; }
