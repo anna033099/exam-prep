@@ -4,7 +4,7 @@ import re, sys, os, io, zipfile, time
 from playwright.sync_api import sync_playwright, expect
 
 BASE = os.environ.get('E2E_BASE', 'http://localhost:5080')
-# 模擬反向代理（Hugging Face）送來的 HTTPS 標頭
+# 模擬反向代理送來的 HTTPS 標頭（網站設定 Site__BehindProxy=true 時）
 HEADERS = {'X-Forwarded-Proto': 'https'} if os.environ.get('E2E_FORWARDED') else {}
 OUT = sys.argv[1]
 PUBLIC = len(sys.argv) > 2 and sys.argv[2] == 'public'

@@ -67,7 +67,12 @@
             <a class="exam-card" asp-controller="Practice" asp-action="Index" asp-route-exam="@e.Exam.Slug">
                 <div class="org">@e.Exam.Organizer</div>
                 <h3>@e.Exam.ShortName</h3>
-                @if (e.Papers > 0)
+                @if (e.Papers > 0 && e.Questions + e.Essays == 0)
+                {
+                    <div class="count"><small>只列原卷連結</small></div>
+                    <div class="years">@(e.FirstYear == e.LastYear ? $"{e.FirstYear} 年" : $"{e.FirstYear}–{e.LastYear} 年")・@e.Papers.ToString("N0") 份試卷</div>
+                }
+                else if (e.Papers > 0)
                 {
                     <div class="count">@((e.Questions + e.Essays).ToString("N0")) <small>題</small></div>
                     <div class="years">@(e.FirstYear == e.LastYear ? $"{e.FirstYear} 年" : $"{e.FirstYear}–{e.LastYear} 年")・@e.Papers.ToString("N0") 份試卷</div>

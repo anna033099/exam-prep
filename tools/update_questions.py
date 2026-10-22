@@ -169,6 +169,13 @@ if not args.skip_post:
                 summary.append(f'- 找到 {len(added)} 份新 PDF，但沒有新的選擇題試卷（可能是申論題或重複公告）')
             shutil.copy(os.path.join(pw, 'post_manifest.json'), master)
 
+# 最後檢查：造字轉換與排除無法確定的題目（sanitize_packs.py）
+r = run([sys.executable, os.path.join(TOOLS, 'sanitize_packs.py'), SEED], ROOT)
+summary.append('')
+summary.append(f"## 最後檢查\n- {r.stdout.strip().splitlines()[-1] if r.stdout.strip() else '完成'}")
+if r.returncode != 0:
+    failed = True
+
 open(os.path.join(ROOT, 'update_summary.md'), 'w', encoding='utf-8').write('\n'.join(summary) + '\n')
 print('\n'.join(summary))
 sys.exit(1 if failed else 0)

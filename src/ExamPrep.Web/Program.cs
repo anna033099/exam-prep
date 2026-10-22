@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var site = builder.Configuration.GetSection("Site").Get<SiteOptions>() ?? new SiteOptions();
-var framed = site.FrameAncestors.Length > 0;
 
 var conn = builder.Configuration.GetConnectionString("Default")
     ?? throw new InvalidOperationException("缺少連線字串 ConnectionStrings:Default");
@@ -32,11 +31,6 @@ builder.Services.ConfigureApplicationCookie(o =>
     o.AccessDeniedPath = "/Account/Denied";
     o.SlidingExpiration = true;
     o.ExpireTimeSpan = TimeSpan.FromDays(14);
-    if (framed)
-    {
-        o.Cookie.SameSite = SameSiteMode.None;
-        o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    }
 });
 
 builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection("Site"));
@@ -55,14 +49,6 @@ if (site.BehindProxy)
     });
 }
 
-builder.Services.AddAntiforgery(o =>
-{
-    if (!framed) return;
-    // 被 iframe 嵌入時，預設的 X-Frame-Options: SAMEORIGIN 會擋住頁面，改由 CSP frame-ancestors 控制
-    o.SuppressXFrameOptionsHeader = true;
-    o.Cookie.SameSite = SameSiteMode.None;
-    o.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-});
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<TaipeiDate>();
 builder.Services.AddScoped<PracticeService>();
@@ -98,8 +84,7 @@ await AppInitializer.RunAsync(app.Services, app.Configuration);
 if (site.BehindProxy) app.UseForwardedHeaders();
 app.Use(async (ctx, next) =>
 {
-    var ancestors = framed ? "'self' " + string.Join(' ', site.FrameAncestors) : "'self'";
-    ctx.Response.Headers["Content-Security-Policy"] = $"frame-ancestors {ancestors}";
+    ctx.Response.Headers["Content-Security-Policy"] = "frame-ancestors 'self'";
     ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
     ctx.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     await next();

@@ -107,10 +107,16 @@ def main():
                 essays.append({'no': e['no'], 'text': e['text'], 'remark': '本題含圖表，請對照原卷 PDF' if e['figure'] else None})
         excluded.sort(key=lambda e: e['no'])
         code = f"CEEC-{m['exam'].upper()}-{year}"
+        makeup = '補考' if re.search(r'補考|補救', title) else ''
+        pcode = re.sub(r'[^\w]', '', subj)[:24] + ('-補考' if makeup else '')
+        n = 2
+        while any(x['paperCode'] == pcode for x in packs[code]):   # 同年度同科目有多份（補考等）
+            pcode = f"{pcode.rsplit('#', 1)[0]}#{n}"
+            n += 1
         if questions or essays:
             packs[code].append({
-                'examCode': code, 'paperCode': re.sub(r'[^\w]', '', subj)[:28], 'examSlug': slug, 'examSlugs': [],
-                'examTitle': f'{year}學年度{ename}', 'rocYear': year, 'categories': [], 'subjectName': subj,
+                'examCode': code, 'paperCode': pcode, 'examSlug': slug, 'examSlugs': [],
+                'examTitle': f'{year}學年度{ename}' + (f'（{makeup}）' if makeup else ''), 'rocYear': year, 'categories': [], 'subjectName': subj,
                 'sourceQuestionUrl': m['q_url'], 'sourceAnswerUrl': m.get('a_url') or '',
                 'sourceNote': '大學入學考試中心網站公布之歷年試題與選擇題答案。', 'answerNote': '',
                 'officialQuestionCount': total, 'excluded': excluded, 'questions': questions, 'essays': essays,
