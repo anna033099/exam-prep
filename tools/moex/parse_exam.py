@@ -298,7 +298,7 @@ def parse_answers(pdf_path):
         if m:
             rows.setdefault(round(y0), []).append((int(m.group(1)), (x0 + x1) / 2))
     for w in words:
-        if w[4] == '題號':
+        if w[4] in ('題號', '題序'):   # 民國 90 年代的答案表寫「題序」
             y = round(w[1])
             nums = [(int(v[4]), (v[0] + v[2]) / 2) for v in words
                     if abs(v[1] - w[1]) < 3 and v[0] > w[2] and re.fullmatch(r'\d{1,3}', v[4])]

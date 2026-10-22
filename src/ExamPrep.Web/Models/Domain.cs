@@ -205,6 +205,9 @@ public class Question
     [MaxLength(5)]
     public string Answer { get; set; } = "";
 
+    /// <summary>全文搜尋用：題幹、選項、題組文章串在一起（資料庫計算欄位，只讀）。</summary>
+    public string SearchText { get; private set; } = "";
+
     /// <summary>提醒文字，例如「本題含圖表，請對照原卷」。</summary>
     [MaxLength(200)]
     public string? Remark { get; set; }

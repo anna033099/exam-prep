@@ -20,6 +20,7 @@ from taxonomy import classify_header, CATEGORIES
 from textnorm import canon
 import pymupdf as fitz
 
+GARBLED = re.compile(r'([\uac00-\ud7af])\1\1')
 SYM = {'': '－', '': '＋', '': '＝'}
 
 
@@ -51,7 +52,7 @@ def answers_layout(pdf):
     t = [unicodedata.normalize('NFKC', l) for l in t]
     out = {}
     for i, line in enumerate(t):
-        nums = re.findall(r'第(\d+)題', line) or (re.findall(r'\b(\d{1,3})\b', line) if line.strip().startswith('題號') else [])
+        nums = re.findall(r'第(\d+)題', line) or (re.findall(r'\b(\d{1,3})\b', line) if re.match(r'題[號序]', line.strip()) else [])
         if nums and i + 1 < len(t) and t[i + 1].strip().startswith('答案'):
             vals = t[i + 1].strip()[2:].split()
             for n, v in zip(nums, vals):
@@ -91,6 +92,9 @@ def _process(m):
             parts = [q['stem'], *q['options'].values(), q['passage'] or '']
             if not all(norm(x) in full for x in parts if x):
                 excluded.append({'no': q['no'], 'reason': '含上下標、數學式或特殊排版，純文字無法正確呈現'})
+            elif GARBLED.search(''.join(x for x in parts if x)):
+                # 字型對應錯誤時兩種讀法會讀出同樣的亂碼，逐字比對抓不到；韓文同一音節連續三次以上視為亂碼
+                excluded.append({'no': q['no'], 'reason': '原卷文字編碼異常（字型對應錯誤），無法正確呈現'})
             elif ans2.get(q['no']) != q['answer']:
                 excluded.append({'no': q['no'], 'reason': '標準答案以兩種方法讀取結果不一致，為避免錯誤不收錄'})
                 ans_mismatch.append(q['no'])

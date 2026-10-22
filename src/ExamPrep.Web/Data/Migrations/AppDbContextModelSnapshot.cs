@@ -440,6 +440,13 @@ namespace ExamPrep.Web.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("SearchText")
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("nvarchar(max)")
+                        .HasComputedColumnSql("UPPER(CONCAT([Stem], N' ', [OptionA], N' ', [OptionB], N' ', [OptionC], N' ', [OptionD], N' ', [OptionE], N' ', [Passage]))", true)
+                        .UseCollation("Latin1_General_100_BIN2");
+
                     b.Property<string>("Stem")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

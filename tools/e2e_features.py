@@ -44,7 +44,7 @@ with sync_playwright() as p:
         page.locator('a.name').first.click(); page.wait_for_load_state()
         assert '公開版不提供這份試卷的題目內文' in page.content()
         page.goto(BASE + '/Search?q=郵政法')
-        found = int(re.search(r'找到\s*(\d+)', page.inner_text('main')).group(1))
+        found = int(re.search(r'找到\s*([\d,]+)', page.inner_text('main')).group(1).replace(',', ''))
         log.append(f'公開模式：郵局試卷只有清單與來源、無作答按鈕；搜尋「郵政法」{found} 題（不含郵局內文）：OK')
         page.screenshot(path=f'{OUT}/p-public-post.png')
 
@@ -119,7 +119,7 @@ with sync_playwright() as p:
 
     # 搜尋
     page.goto(BASE + '/Search?q=比例原則')
-    n = int(re.search(r'找到\s*(\d+)', page.inner_text('main')).group(1))
+    n = int(re.search(r'找到\s*([\d,]+)', page.inner_text('main')).group(1).replace(',', ''))
     assert n > 0
     page.locator('.paper-row a.name').first.click(); page.wait_for_url(re.compile(r'/Q/\d+'))
     assert '比例原則' in page.inner_text('main')

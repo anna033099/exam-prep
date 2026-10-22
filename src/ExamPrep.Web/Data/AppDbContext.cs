@@ -43,6 +43,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<PaperExamLink>().HasOne(l => l.Paper).WithMany(p => p.ExamLinks).HasForeignKey(l => l.PaperId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<PaperExamLink>().HasOne(l => l.Exam).WithMany().HasForeignKey(l => l.ExamId).OnDelete(DeleteBehavior.NoAction);
         b.Entity<Question>().HasIndex(q => q.Type);
+        // 搜尋時只掃一個欄位，比對七個欄位快很多（題庫有數十萬題）
+        b.Entity<Question>().Property(q => q.SearchText)
+            .HasComputedColumnSql("UPPER(CONCAT([Stem], N' ', [OptionA], N' ', [OptionB], N' ', [OptionC], N' ', [OptionD], N' ', [OptionE], N' ', [Passage]))", stored: true)
+            .UseCollation("Latin1_General_100_BIN2");   // 二進位比對：LIKE '%字%' 比語言排序規則快數倍；英文已先轉大寫
         b.Entity<QuestionPaper>().HasOne(p => p.Exam).WithMany().OnDelete(DeleteBehavior.SetNull);
 
         b.Entity<Question>().HasIndex(q => new { q.PaperId, q.Number }).IsUnique();

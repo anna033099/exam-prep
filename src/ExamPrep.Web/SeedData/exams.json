@@ -1718,6 +1718,32 @@
    "sortOrder": 55
   },
   {
+   "slug": "gsat",
+   "name": "大學學科能力測驗",
+   "shortName": "學測",
+   "organizer": "大學入學考試中心",
+   "organizerType": "Admission",
+   "summary": "大學入學考試中心辦理的學科能力測驗；本站收錄大考中心網站公布的歷年試題與選擇題答案。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.ceec.edu.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "升學考試",
+   "sortOrder": 56
+  },
+  {
+   "slug": "ast",
+   "name": "大學分科測驗（指定科目考試）",
+   "shortName": "分科測驗／指考",
+   "organizer": "大學入學考試中心",
+   "organizerType": "Admission",
+   "summary": "大學入學考試中心辦理的分科測驗（111 學年度以前為指定科目考試）；本站收錄大考中心網站公布的歷年試題與選擇題答案。這類考試的試題著作權屬主辦單位，公開版只列出試卷與原始來源連結。",
+   "officialUrl": "https://www.ceec.edu.tw/",
+   "sessions": [],
+   "subjects": [],
+   "group": "升學考試",
+   "sortOrder": 57
+  },
+  {
    "slug": "finance",
    "name": "台灣金融研訓院金融專業能力測驗（授信、外匯、理財、信託等）",
    "shortName": "金融證照",
@@ -1728,7 +1754,7 @@
    "sessions": [],
    "subjects": [],
    "group": "財稅・金融",
-   "sortOrder": 56
+   "sortOrder": 58
   }
  ]
 }

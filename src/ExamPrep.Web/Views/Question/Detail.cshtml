@@ -140,7 +140,7 @@
             <h2 class="h5">出處</h2>
             <p class="small mb-1">@p.RocYear 年 @p.ExamTitle</p>
             <p class="small mb-1">@p.SubjectName・試題代號 @p.PaperCode</p>
-            <p class="small mb-0"><a href="@p.SourceQuestionUrl" target="_blank" rel="noopener">原卷 PDF</a>@if (p.SourceAnswerUrl != p.SourceQuestionUrl) { <text>　<a href="@p.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF</a></text> }</p>
+            <p class="small mb-0"><a href="@p.SourceQuestionUrl" target="_blank" rel="noopener">原卷 PDF</a>@if (!string.IsNullOrEmpty(p.SourceAnswerUrl) && p.SourceAnswerUrl != p.SourceQuestionUrl) { <text>　<a href="@p.SourceAnswerUrl" target="_blank" rel="noopener">標準答案 PDF</a></text> }</p>
         </div>
 
         <div class="sheet" id="errata">

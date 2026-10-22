@@ -166,6 +166,8 @@ public class SearchVm
     public int Page { get; set; } = 1;
     public int PageCount { get; set; } = 1;
     public int Total { get; set; }
+    /// <summary>符合的題目超過上限，只列出最新的部分。</summary>
+    public bool Truncated { get; set; }
     public List<Exam> Exams { get; set; } = new();
     public List<Question> Results { get; set; } = new();
     public const int PageSize = 30;

@@ -21,7 +21,8 @@ public class HomeController(AppDbContext db, UserManager<ApplicationUser> users,
             var examStats = await catalog.ExamStatsAsync();
             // 首頁示範題：從快取的候選題目中隨機挑一題
             var ids = await catalog.SampleQuestionIdsAsync();
-            var sample = ids.Count == 0 ? null : await db.Questions.Include(q => q.Paper).AsNoTracking().FirstOrDefaultAsync(q => q.Id == ids[Random.Shared.Next(ids.Count)]);
+            var pickId = ids.Count == 0 ? 0 : ids[Random.Shared.Next(ids.Count)];
+            var sample = ids.Count == 0 ? null : await db.Questions.Include(q => q.Paper).AsNoTracking().FirstOrDefaultAsync(q => q.Id == pickId);
             var (choice, essay) = await catalog.AllQuestionCountsAsync();
             return View("Landing", new LandingVm
             {

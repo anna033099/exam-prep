@@ -18,6 +18,8 @@ EXTRA = [
     ('sugar', '台灣糖業股份有限公司新進工員甄試', '台糖招考', '國營事業', '台灣糖業公司', 'StateEnterprise', 'https://www.taisugar.com.tw/'),
     ('ttl', '臺灣菸酒股份有限公司從業職員及從業評價職位人員甄試', '臺灣菸酒招考', '國營事業', '臺灣菸酒公司', 'StateEnterprise', 'https://www.ttl.com.tw/'),
     ('irrig', '灌溉管理組織新進農田水利事業人員甄試', '農田水利招考', '國營事業', '農業部農田水利署', 'StateEnterprise', 'https://www.ia.gov.tw/'),
+    ('gsat', '大學學科能力測驗', '學測', '升學考試', '大學入學考試中心', 'Admission', 'https://www.ceec.edu.tw/'),
+    ('ast', '大學分科測驗（指定科目考試）', '分科測驗／指考', '升學考試', '大學入學考試中心', 'Admission', 'https://www.ceec.edu.tw/'),
     ('finance', '台灣金融研訓院金融專業能力測驗（授信、外匯、理財、信託等）', '金融證照', '財稅・金融', '台灣金融研訓院', 'Certification', 'https://www.tabf.org.tw/LicenseHistoryExam.aspx'),
 ]
 SUMMARY = {
@@ -25,6 +27,8 @@ SUMMARY = {
     'sugar': '台灣糖業公司自辦的新進工員甄試。',
     'ttl': '臺灣菸酒公司自辦的從業職員及從業評價職位人員甄試。',
     'irrig': '灌溉管理組織（各地管理處）辦理的新進農田水利事業人員甄試。',
+    'gsat': '大學入學考試中心辦理的學科能力測驗；本站收錄大考中心網站公布的歷年試題與選擇題答案。',
+    'ast': '大學入學考試中心辦理的分科測驗（111 學年度以前為指定科目考試）；本站收錄大考中心網站公布的歷年試題與選擇題答案。',
     'finance': '台灣金融研訓院辦理的金融專業能力測驗；本站收錄研訓院網站公布的歷屆試題。',
 }
 data = json.load(open(PATH, encoding='utf-8'))

@@ -20,7 +20,7 @@ else if (Model.Q.Length < 2)
 }
 else
 {
-    <p class="text-muted">找到 <strong class="num">@Model.Total</strong> 題@(Model.PageCount > 1 ? $"，第 {Model.Page} / {Model.PageCount} 頁" : "")。</p>
+    <p class="text-muted">找到 <strong class="num">@Model.Total.ToString("N0")</strong>@(Model.Truncated ? " 題以上（只列出最新的部分，可加上考試類別或更精確的關鍵字縮小範圍）" : " 題")@(Model.PageCount > 1 ? $"，第 {Model.Page} / {Model.PageCount} 頁" : "")。</p>
     @if (Model.Total == 0)
     {
         <div class="empty sheet"><p class="mb-0">沒有題目包含「@Model.Q」。試試較短的關鍵字。</p></div>
