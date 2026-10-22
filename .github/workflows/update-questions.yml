@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: update-questions
+  group: update-seed
   cancel-in-progress: false
 
 jobs:

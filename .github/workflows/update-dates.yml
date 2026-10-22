@@ -1,0 +1,69 @@
+name: 每月更新考期
+
+# 每月 6 日 03:27 UTC（台灣時間 11:27）從考選部的政府資料開放資料集更新初等、高普考、地方特考考期。
+# 欄位或日期格式不符就整批不寫入；有變更才提交並重新部署。也可以在 Actions 頁面手動執行。
+on:
+  schedule:
+    - cron: "27 3 6 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-seed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install --quiet requests==2.34.2
+
+      - name: 下載官方考期並更新
+        run: python tools/update_dates.py --dump "$RUNNER_TEMP/raw" --summary "$GITHUB_STEP_SUMMARY"
+
+      - name: 保存官方原始檔
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moex-dates-raw
+          path: ${{ runner.temp }}/raw
+          if-no-files-found: ignore
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: 確認網站仍可建置與通過測試
+        run: dotnet test --configuration Release
+
+      - name: 提交考期
+        id: commit
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "examprep-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/ExamPrep.Web/SeedData/exams.json
+          git commit -m "每月自動更新考期 $(date -u +%Y-%m-%d)"
+          git pull --rebase
+          git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    uses: ./.github/workflows/deploy-hf.yml
+    secrets:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
